@@ -1,0 +1,29 @@
+{
+  "name": "@busbud/stairs",
+  "version": "1.0.0",
+  "description": "Busbud's bot for stair climbing achievements.",
+  "homepage": "https://github.com/busbud/stairs",
+  "bugs": {
+    "url": "https://github.com/busbud/stairs/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Busbud",
+    "url": "https://www.busbud.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/busbud/stairs.git"
+  },
+  "scripts": {
+    "test": "standard"
+  },
+  "devDependencies": {
+    "standard": "^7.0.1"
+  },
+  "standard": {
+    "ignore": [
+      "/hubot"
+    ]
+  }
+}
