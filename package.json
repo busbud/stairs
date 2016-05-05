@@ -16,6 +16,7 @@
     "url": "https://github.com/busbud/stairs.git"
   },
   "scripts": {
+    "db:create": "tasks/db-create",
     "test": "standard"
   },
   "devDependencies": {
@@ -25,5 +26,9 @@
     "ignore": [
       "/hubot"
     ]
+  },
+  "dependencies": {
+    "pg": "^4.5.5",
+    "sequelize": "^3.22.0"
   }
 }
