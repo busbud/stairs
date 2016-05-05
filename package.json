@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "start": "node ."
+  },
+  "dependencies": {
+    "@busbud/stairs": "busbud/stairs#42a11b707a3d442bdb8d90b87480038bda678489",
+    "stdbot": "^0.2.0",
+    "stdbot-flowdock": "^0.3.0"
+  },
+  "engines": {
+    "node": "^6.0.0"
+  }
+}
