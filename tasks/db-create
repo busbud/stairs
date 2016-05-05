@@ -1,11 +1,7 @@
 #!/usr/bin/env node
 
-const Sequelize = require('sequelize')
-const models = require('../src/models')
+const Stairs = require('../')
+const stairs = Stairs({ db: process.argv[2] })
 
-const db = new Sequelize(process.argv[2])
-
-models(db)
-
-db.sync({ force: true })
-  .then(() => db.close())
+stairs.create()
+  .then(() => stairs.end())

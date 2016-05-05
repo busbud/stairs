@@ -28,6 +28,7 @@
     ]
   },
   "dependencies": {
+    "node-uuid": "^1.4.7",
     "pg": "^4.5.5",
     "sequelize": "^3.22.0"
   }
