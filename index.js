@@ -14,6 +14,10 @@ function Stairs (config) {
     order: [['createdAt', 'DESC']]
   })
     .then(session => {
+      if (!session) {
+        return
+      }
+
       currentSessionId = session.id
       sessions[currentSessionId] = session
     })
