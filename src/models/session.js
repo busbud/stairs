@@ -1,2 +1,8 @@
-// Need ID and creation date, this is automatic.
-module.exports = (db, User) => db.define('session')
+const Sequelize = require('sequelize')
+
+module.exports = db => db.define('session', {
+  id: {
+    type: Sequelize.STRING,
+    primaryKey: true
+  }
+})

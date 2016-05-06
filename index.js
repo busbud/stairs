@@ -8,23 +8,31 @@ function Stairs (config) {
   const db = new Sequelize(config.db)
   const { User, Session, Run } = models(db)
 
-  let currentThread
+  let currentSessionId
+
+  Session.find({
+    order: [['createdAt', 'DESC']]
+  })
+    .then(session => {
+      currentSessionId = session.id
+      sessions[currentSessionId] = session
+    })
 
   function onError (err) {
     console.error(`${new Date()} ${err.stack || err}`)
   }
 
   function onStairs (message) {
-    currentThread = message.thread || uuid.v4()
+    currentSessionId = message.thread || uuid.v4()
 
-    return Session.create()
+    return Session.create({ id: currentSessionId })
       .then(session => {
-        sessions[currentThread] = session
+        sessions[currentSessionId] = session
       })
   }
 
   function onDone (message) {
-    const session = sessions[message.thread || currentThread]
+    const session = sessions[message.thread || currentSessionId]
 
     if (!session) {
       return message.reply('There was no stairs session here!')
