@@ -27,7 +27,7 @@ function Stairs (config) {
   }
 
   function onStairs (message) {
-    currentSessionId = message.thread || uuid.v4()
+    currentSessionId = String(message.thread || uuid.v4())
 
     console.log(`#stairs ${currentSessionId}`)
 
@@ -52,13 +52,13 @@ function Stairs (config) {
     console.log(`#done ${session.id} ${message.author.name} ${floors}`)
 
     return User.upsert({
-      id: message.author.id,
+      id: String(message.author.id),
       name: message.author.name
     })
       .then(() => {
         return Run.create({
           floors,
-          userId: message.author.id,
+          userId: String(message.author.id),
           sessionId: session.id
         })
       })
