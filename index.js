@@ -61,7 +61,7 @@ function Stairs (config) {
   function onMessage (message) {
     message = Object.assign({}, message, { words: message.text.split(/(?::|,|!|.|\?)? +/) })
 
-    if (message.words.includes('@team') && message.words.includes('#stairs')) {
+    if (message.words.includes('#stairs')) {
       return onStairs(message)
         .catch(onError)
     }
