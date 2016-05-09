@@ -87,6 +87,8 @@ function Stairs (config) {
     config.adapter.on('message', onMessage)
   }
 
+  console.log('Started listening for messages')
+
   stairs.create = () =>
     db.sync({ force: true })
 
