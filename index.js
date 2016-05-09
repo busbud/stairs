@@ -29,6 +29,8 @@ function Stairs (config) {
   function onStairs (message) {
     currentSessionId = message.thread || uuid.v4()
 
+    console.log(`#stairs ${currentSessionId}`)
+
     return Session.create({ id: currentSessionId })
       .then(session => {
         sessions[currentSessionId] = session
@@ -38,12 +40,16 @@ function Stairs (config) {
   function onDone (message) {
     const session = sessions[message.thread || currentSessionId]
 
+    console.log(`#done ${message.author.name}`)
+
     if (!session) {
       return message.reply('There was no stairs session here!')
     }
 
     const number = message.words[message.words.indexOf('#done') + 1]
     const floors = number && number.match(/^\d+/) ? Number(number) : config.floors
+
+    console.log(`#done ${session.id} ${message.author.name} ${floors}`)
 
     return User.upsert({
       id: message.author.id,
