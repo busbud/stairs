@@ -3,7 +3,7 @@
     "start": "node ."
   },
   "dependencies": {
-    "@busbud/stairs": "busbud/stairs#42a11b707a3d442bdb8d90b87480038bda678489",
+    "@busbud/stairs": "busbud/stairs#a5f1abbe06e470e266bbefae3915fa1ca4ee0d66",
     "stdbot": "^0.2.0",
     "stdbot-flowdock": "^0.3.0"
   },
