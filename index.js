@@ -65,7 +65,7 @@ function Stairs (config) {
   }
 
   function onMessage (message) {
-    message = Object.assign({}, message, { words: message.text.split(/(?::|,|!|\.|\?)? +/) })
+    message = Object.assign({}, message, { words: message.text.split(/(?::|,|!|\.|\?)?(?: +|$)/) })
 
     if (message.words.includes('#stairs')) {
       return onStairs(message)
