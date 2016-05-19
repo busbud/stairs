@@ -1,0 +1,14 @@
+[Unit]
+Description=Stairs bot
+
+[Service]
+WorkingDirectory=/home/stairs/stairs
+Environment=STAIRS_FLOORS=9
+Environment=STAIRS_FLOOR_HEIGHT=3.6576
+Environment=DATABASE_URL=stairs
+Environment=FLOWDOCK_FLOWS=stairs
+Environment=FLOWDOCK_TOKEN=token
+ExecStart=/usr/bin/npm start
+
+[Install]
+WantedBy=default.target
