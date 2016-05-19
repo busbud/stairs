@@ -3,9 +3,9 @@
     "start": "node ."
   },
   "dependencies": {
-    "@busbud/stairs": "busbud/stairs#8278f9f89397fafe8f9f517780ddf9eaf7944f11",
-    "stdbot": "^0.2.0",
-    "stdbot-flowdock": "^0.3.0"
+    "@busbud/stairs": "busbud/stairs",
+    "stdbot": "^0.3.0",
+    "stdbot-flowdock": "^0.4.1"
   },
   "engines": {
     "node": "^6.0.0"
