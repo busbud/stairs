@@ -1,3 +1,4 @@
+const Table = require('cli-table2')
 const uuid = require('node-uuid')
 const pg = require('pg-promise')()
 
@@ -63,6 +64,27 @@ function Stairs (config) {
       .then(() => message.tag('#gg'))
   }
 
+  function onLeaderboard (message) {
+    return db.query(`
+        SELECT users.name,
+               sum(floors) AS floors
+          FROM runs
+          JOIN users
+            ON users.id = runs.user_id
+      GROUP BY user_id, users.name
+      ORDER BY sum(floors) DESC
+    `)
+      .then(rows => {
+        const table = new Table({
+          head: ['#', 'name', 'floors'],
+          style: { head: [], border: [] }
+        })
+
+        rows.forEach((row, rank) => table.push([rank + 1, row.name, row.floors]))
+        message.send('```\n' + table.toString() + '\n```')
+      })
+  }
+
   function onMessage (message) {
     message = Object.assign({}, message, { words: message.text.split(/(?::|,|!|\.|\?)?(?: +|$)/) })
     const actions = []
@@ -73,6 +95,10 @@ function Stairs (config) {
 
     if (message.words.includes('#done')) {
       actions.push(onDone)
+    }
+
+    if (message.words.includes('#lead') || message.words.includes('#leaderboard')) {
+      actions.push(onLeaderboard)
     }
 
     return actions.reduce((promise, action) => promise.then(() => action(message)), Promise.resolve())
