@@ -16,13 +16,11 @@
     "url": "https://github.com/busbud/stairs.git"
   },
   "scripts": {
-    "db:create": "tasks/db-create",
     "test": "standard"
   },
   "dependencies": {
     "node-uuid": "^1.4.7",
-    "pg": "^4.5.5",
-    "sequelize": "^3.22.0"
+    "pg-promise": "^4.2.3"
   },
   "devDependencies": {
     "standard": "^7.0.1"

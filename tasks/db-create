@@ -1,7 +1,0 @@
-#!/usr/bin/env node
-
-const Stairs = require('../')
-const stairs = Stairs({ db: process.argv[2] })
-
-stairs.create()
-  .then(() => stairs.end())

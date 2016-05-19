@@ -1,18 +1,21 @@
 const uuid = require('node-uuid')
-const Sequelize = require('sequelize')
-const models = require('./src/models')
+const pg = require('pg-promise')()
+
+const isDuplicate = err => err.code === '23505'
 
 function Stairs (config) {
   const stairs = {}
   const sessions = {}
-  const db = new Sequelize(config.db)
-  const { User, Session, Run } = models(db)
+  const db = pg(config.db)
 
   let currentSessionId
 
-  Session.find({
-    order: [['createdAt', 'DESC']]
-  })
+  function onError (err) {
+    console.error(`${new Date()} ${err.stack || err}`)
+  }
+
+  db.query('SELECT * FROM sessions ORDER by created_at DESC')
+    .then(res => res[0])
     .then(session => {
       if (!session) {
         return
@@ -21,19 +24,23 @@ function Stairs (config) {
       currentSessionId = session.id
       sessions[currentSessionId] = session
     })
-
-  function onError (err) {
-    console.error(`${new Date()} ${err.stack || err}`)
-  }
+    .catch(onError)
 
   function onStairs (message) {
     currentSessionId = String(message.thread || uuid.v4())
 
     console.log(`#stairs ${currentSessionId}`)
 
-    return Session.create({ id: currentSessionId })
+    return db.query('INSERT INTO sessions (id) VALUES ($1) RETURNING *', [currentSessionId])
+      .then(res => res[0])
       .then(session => {
         sessions[currentSessionId] = session
+      })
+      .catch(err => {
+        // Ignore if the session already existed.
+        if (!isDuplicate(err)) {
+          throw err
+        }
       })
   }
 
@@ -51,17 +58,9 @@ function Stairs (config) {
 
     console.log(`#done ${session.id} ${message.author.name} ${floors}`)
 
-    return User.upsert({
-      id: String(message.author.id),
-      name: message.author.name
-    })
-      .then(() => {
-        return Run.create({
-          floors,
-          userId: String(message.author.id),
-          sessionId: session.id
-        })
-      })
+    return db.query('INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2', [message.author.id, message.author.name])
+      .then(() => db.query('INSERT INTO runs (user_id, session_id, floors) VALUES ($1, $2, $3)', [message.author.id, session.id, floors]))
+      .then(() => message.tag('#gg'))
   }
 
   function onMessage (message) {
@@ -89,11 +88,8 @@ function Stairs (config) {
 
   console.log('Started listening for messages')
 
-  stairs.create = () =>
-    db.sync({ force: true })
-
   stairs.end = () => {
-    db.close()
+    db.end()
 
     if (config.adapter) {
       config.adapter.end()
