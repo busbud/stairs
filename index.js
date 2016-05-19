@@ -65,18 +65,18 @@ function Stairs (config) {
 
   function onMessage (message) {
     message = Object.assign({}, message, { words: message.text.split(/(?::|,|!|\.|\?)?(?: +|$)/) })
+    const actions = []
 
     if (message.words.includes('#stairs')) {
-      return onStairs(message)
-        .catch(onError)
+      actions.push(onStairs)
     }
 
     if (message.words.includes('#done')) {
-      return onDone(message)
-        .catch(onError)
+      actions.push(onDone)
     }
 
-    return Promise.resolve()
+    return actions.reduce((promise, action) => promise.then(() => action(message)), Promise.resolve())
+      .catch(onError)
   }
 
   if (!config.adapter) {
