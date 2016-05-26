@@ -11,12 +11,13 @@ adapter of your choice.
 For both Heroku and systemd, you need the following environment
 variables (example for Flowdock):
 
-| Name           | Value                        |
-| -------------- | ---------------------------- |
-| DATABASE_URL   | PostgreSQL connection string |
-| STAIRS_FLOORS  | Default number of floors     |
-| FLOWDOCK_FLOWS | Flows to listen to           |
-| FLOWDOCK_TOKEN | Bot user Flowdock token      |
+| Name                | Value                        |
+| ------------------- | ---------------------------- |
+| DATABASE_URL        | PostgreSQL connection string |
+| STAIRS_FLOORS       | Default number of floors     |
+| STAIRS_FLOOR_HEIGHT | Height in meters of a floor  |
+| FLOWDOCK_FLOWS      | Flows to listen to           |
+| FLOWDOCK_TOKEN      | Bot user Flowdock token      |
 
 Either set them in the Heroku interface or in the `stairs.service` for
 systemd.

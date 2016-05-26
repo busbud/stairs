@@ -4,6 +4,7 @@ const Flowdock = require('stdbot-flowdock')
 
 Stairs({
   floors: process.env.STAIRS_FLOORS,
+  floorHeight: process.env.STAIRS_FLOOR_HEIGHT,
   db: process.env.DATABASE_URL,
   adapter: Stdbot(Flowdock({
     flows: process.env.FLOWDOCK_FLOWS.split(','),
