@@ -30,6 +30,8 @@ Stairs({
 
 ### With [Hubot]
 
+[hubot]: https://hubot.github.com/
+
 ```sh
 npm install --save busbud/stairs
 ```
