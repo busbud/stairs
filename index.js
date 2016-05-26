@@ -100,19 +100,19 @@ function Stairs (config) {
       .then(res => res[0].total * config.floorHeight)
       .then(total => {
         const table = new Table({
-          head: ['done', 'name', 'location', 'height'],
+          head: ['#', 'name', 'location', 'height'],
           style: { head: [], border: [] }
         })
 
         const next = achievements.find(({ height }) => height > total)
         const leftMeters = next.height - total
-        const leftRuns = Math.round(leftMeters / config.floorHeight / config.floors)
+        const leftRuns = leftMeters / config.floorHeight / config.floors
 
         achievements.forEach(({ name, location, height }) => table.push([total >= height ? '✓' : '✗', name, location, `${height} meters`]))
 
         return Promise.all([
           message.send('```\n' + table.toString() + '\n```'),
-          message.send(`${leftRuns} runs (${leftMeters} meters) left for next achievement (${next.name}).`)
+          message.send(`${Math.round(leftRuns)} runs (${Math.round(leftMeters)} meters) left for next achievement (${next.name}).`)
         ])
       })
   }
