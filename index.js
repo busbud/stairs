@@ -10,6 +10,7 @@ function Stairs (config) {
   const db = pg(config.db)
 
   let currentSessionId
+  let achievements = []
 
   function onError (err) {
     console.error(`${new Date()} ${err.stack || err}`)
@@ -25,6 +26,10 @@ function Stairs (config) {
       currentSessionId = session.id
       sessions[currentSessionId] = session
     })
+    .catch(onError)
+
+  db.query('SELECT * FROM achievements ORDER BY height')
+    .then(res => achievements = res)
     .catch(onError)
 
   function onStairs (message) {
@@ -62,6 +67,11 @@ function Stairs (config) {
     return db.query('INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2', [message.author.id, message.author.name])
       .then(() => db.query('INSERT INTO runs (user_id, session_id, floors) VALUES ($1, $2, $3)', [message.author.id, session.id, floors]))
       .then(() => message.tag('#gg'))
+      .then(() => db.query('SELECT SUM(floors) AS total FROM runs'))
+      .then(res => res[0].total * config.floorHeight)
+      .then(total => (console.log(`#total ${total}`), total))
+      .then(total => achievements.find(({ height }) => height > (total - (floors * config.floorHeight)) && height <= total))
+      .then(achievement => achievement && message.send(`@team, you just reached the ${achievement.name} (${achievement.location}), with a total of ${achievement.height} meters!`))
   }
 
   function onLeaderboard (message) {
@@ -81,9 +91,32 @@ function Stairs (config) {
         })
 
         rows.forEach((row, rank) => table.push([rank + 1, row.name, row.floors]))
-        message.send('```\n' + table.toString() + '\n```')
+        return message.send('```\n' + table.toString() + '\n```')
       })
   }
+
+  function onAchievements (message) {
+    return db.query('SELECT SUM(floors) AS total FROM runs')
+      .then(res => res[0].total * config.floorHeight)
+      .then(total => {
+        const table = new Table({
+          head: ['done', 'name', 'location', 'height'],
+          style: { head: [], border: [] }
+        })
+
+        const next = achievements.find(({ height }) => height > total)
+        const leftMeters = next.height - total
+        const leftRuns = Math.round(leftMeters / config.floorHeight / config.floors)
+
+        achievements.forEach(({ name, location, height }) => table.push([total >= height ? '✓' : '✗', name, location, `${height} meters`]))
+
+        return Promise.all([
+          message.send('```\n' + table.toString() + '\n```'),
+          message.send(`${leftRuns} runs (${leftMeters} meters) left for next achievement (${next.name}).`)
+        ])
+      })
+  }
+
 
   function onMessage (message) {
     message = Object.assign({}, message, { words: message.text.split(/(?::|,|!|\.|\?)?(?: +|$)/) })
@@ -99,6 +132,10 @@ function Stairs (config) {
 
     if (message.words.includes('#lead') || message.words.includes('#leaderboard')) {
       actions.push(onLeaderboard)
+    }
+
+    if (message.words.includes('#achievements')) {
+      actions.push(onAchievements)
     }
 
     return actions.reduce((promise, action) => promise.then(() => action(message)), Promise.resolve())

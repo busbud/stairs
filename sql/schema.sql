@@ -19,4 +19,11 @@ CREATE TABLE runs (
     created_at timestamp DEFAULT now() NOT NULL
 );
 
+CREATE TABLE achievements (
+    id serial PRIMARY KEY,
+    name text NOT NULL,
+    location text NOT NULL,
+    height integer NOT NULL
+);
+
 COMMIT;
