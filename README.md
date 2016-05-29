@@ -64,7 +64,3 @@ module.exports = robot => {
   })
 }
 ```
-
-## To-do
-
-* Add achievements.
