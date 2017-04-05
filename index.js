@@ -59,7 +59,7 @@ function Stairs (config) {
       return message.reply('There was no stairs session here!')
     }
 
-    const number = message.words[message.words.indexOf('#done') + 1]
+    const number = message.words[message.words.indexOf(message.doneHash) + 1]
     const floors = number && number.match(/^\d+/) ? Number(number) : config.floors
 
     console.log(`#done ${session.id} ${message.author.name} ${floors}`)
@@ -127,6 +127,13 @@ function Stairs (config) {
     }
 
     if (message.words.includes('#done')) {
+      message.doneHash = '#done';
+      actions.push(onDone)
+    }
+
+    if (message.words.includes('#std')) {
+      message.doneHash = '#std';
+      actions.push(onStairs)
       actions.push(onDone)
     }
 
