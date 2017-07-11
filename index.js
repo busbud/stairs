@@ -76,12 +76,21 @@ function Stairs (config) {
 
   function onLeaderboard (message) {
     return db.query(`
-        SELECT users.name,
+          WITH recent_users
+            AS (
+                  SELECT users.*
+                    FROM users
+                    JOIN runs
+                      ON runs.user_id = users.id
+                GROUP BY users.id
+                  HAVING max(runs.created_at) > now() - interval '2 months'
+               )
+        SELECT recent_users.name,
                sum(floors) AS floors
           FROM runs
-          JOIN users
-            ON users.id = runs.user_id
-      GROUP BY user_id, users.name
+          JOIN recent_users
+            ON recent_users.id = runs.user_id
+      GROUP BY user_id, recent_users.name
       ORDER BY sum(floors) DESC
     `)
       .then(rows => {
