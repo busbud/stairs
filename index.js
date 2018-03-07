@@ -90,6 +90,7 @@ function Stairs (config) {
           FROM runs
           JOIN recent_users
             ON recent_users.id = runs.user_id
+         WHERE created_at > date_trunc('year', now())
       GROUP BY user_id, recent_users.name
       ORDER BY sum(floors) DESC
     `)
