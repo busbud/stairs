@@ -1,18 +1,18 @@
-const Stairs = require('../')
+const Stairs = require('../');
 
 const stairs = Stairs({
   floors: 9,
   db: 'postgres://localhost/stairs'
-})
+});
 
-const foo = { id: '1', name: 'foo' }
-const bar = { id: '2', name: 'bar' }
+const foo = { id: '1', name: 'foo' };
+const bar = { id: '2', name: 'bar' };
 
-function send (message) {
+function send(message) {
   return stairs.onMessage(Object.assign({
     send: message => Promise.resolve(message),
     reply: message => Promise.resolve(message)
-  }, message))
+  }, message));
 }
 
 stairs.create()
@@ -28,4 +28,4 @@ stairs.create()
     author: bar,
     text: '#done'
   }))
-  .then(() => stairs.end())
+  .then(() => stairs.end());

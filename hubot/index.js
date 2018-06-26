@@ -1,16 +1,16 @@
-const Stairs = require('@busbud/stairs')
+const FitnessBot = require('@busbud/stairs');
 
-const room = process.env.HUBOT_STAIRS_ROOM
-const isRoom = room ? message => message.room === room : message => true
+const room = process.env.HUBOT_FITNESS_ROOM;
+const isRoom = room ? message => message.room === room : message => true;
 
-const stairs = Stairs({
+const fitness_bot = FitnessBot({
   floors: process.env.HUBOT_STAIRS_FLOORS,
-  db: process.env.HUBOT_STAIRS_DB
-})
+  db: process.env.HUBOT_FITNESS_DB
+});
 
 module.exports = robot => {
   robot.listen(isRoom, res => {
-    stairs.onMessage({
+    fitness_bot.onMessage({
       author: {
         id: res.message.user.id,
         name: res.message.user.name
@@ -19,6 +19,6 @@ module.exports = robot => {
       thread: res.message.metadata && res.message.metadata.thread_id,
       send: res.send.bind(res),
       reply: res.reply.bind(res)
-    })
-  })
-}
+    });
+  });
+};
