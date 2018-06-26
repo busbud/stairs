@@ -2,7 +2,7 @@ const pg = require('pg-promise')()
 
 const stairs = require('stairs')
 
-class AppData {
+class State {
   constructor (achievements, config, db) {
     this.achievements = achievements
     this.config = config
@@ -13,12 +13,12 @@ class AppData {
 function FitnessBot (config) {
   const fitnessBot = {}
   const db = pg(config.db)
-  let appData
+  let state
 
   function init () {
     db.query('SELECT * FROM achievements ORDER BY height')
       .then(res => {
-        appData = new AppData(res, config, db)
+        state = new State(res, config, db)
       })
       .catch(onError)
   }
@@ -44,7 +44,7 @@ function FitnessBot (config) {
       actions.push(stairs.onStairsAchievements)
     }
 
-    return actions.reduce((promise, action) => promise.then(() => action(message, appData)), Promise.resolve())
+    return actions.reduce((promise, action) => promise.then(() => action(message, state)), Promise.resolve())
       .catch(onError)
   }
 
