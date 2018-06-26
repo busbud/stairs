@@ -3,17 +3,17 @@ const pg = require('pg-promise')()
 const stairs = require('stairs')
 
 class AppData {
-  constructor(achievements, config, db) {
-    this.achievements = achievements;
-    this.config = config;
-    this.db = db;
+  constructor (achievements, config, db) {
+    this.achievements = achievements
+    this.config = config
+    this.db = db
   }
 }
 
 function FitnessBot (config) {
   const fitnessBot = {}
   const db = pg(config.db)
-  let appData;
+  let appData
 
   function init () {
     db.query('SELECT * FROM achievements ORDER BY height')
