@@ -1,6 +1,6 @@
 # [Stairway to Heaven](https://youtu.be/8pPvNqOb6RA)
 
-> Busbud's bot for all things Fitness, including stair climbing and
+> Busbud's bot for all things fitness, including stair climbing and
 bike riding achievements.
 
 ## Usage
@@ -45,14 +45,14 @@ const FitnessBot = require('@busbud/stairs')
 const room = process.env.HUBOT_FITNESS_ROOM
 const isRoom = room ? message => message.room === room : message => true
 
-const fitness_bot = FitnessBot({
+const fitnessBot = FitnessBot({
   floors: process.env.HUBOT_STAIRS_FLOORS,
   db: process.env.HUBOT_FITNESS_DB
 })
 
 module.exports = robot => {
   robot.listen(isRoom, res => {
-    fitness_bot.onMessage({
+    fitnessBot.onMessage({
       author: {
         id: res.message.user.id,
         name: res.message.user.name
