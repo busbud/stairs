@@ -1,22 +1,31 @@
 const pg = require('pg-promise')()
 
-const stairs = require('src/stairs')
+const stairs = require('stairs')
+
+class AppData {
+  constructor(achievements, config, db) {
+    this.achievements = achievements;
+    this.config = config;
+    this.db = db;
+  }
+}
 
 function FitnessBot (config) {
   const fitnessBot = {}
   const db = pg(config.db)
+  let appData;
 
-  let achievements = []
+  function init () {
+    db.query('SELECT * FROM achievements ORDER BY height')
+      .then(res => {
+        appData = new AppData(res, config, db)
+      })
+      .catch(onError)
+  }
 
   function onError (err) {
     console.error(`${new Date()} ${err.stack || err}`)
   }
-
-  db.query('SELECT * FROM achievements ORDER BY height')
-    .then(res => {
-      achievements = res
-    })
-    .catch(onError)
 
   function onMessage (message) {
     message = Object.assign({}, message, { words: message.text.split(/(?::|,|!|\.|\?)?(?: +|$)/) })
@@ -24,18 +33,18 @@ function FitnessBot (config) {
 
     if (message.words.includes('#std')) {
       message.doneHash = '#std'
-      actions.push({function: stairs.onStairsDone, args: [db, config, achievements]})
+      actions.push(stairs.onStairsDone)
     }
 
     if (message.words.includes('#lead') || message.words.includes('#leaderboard')) {
-      actions.push({function: stairs.onStairsLeaderboard, args: [db]})
+      actions.push(stairs.onStairsLeaderboard)
     }
 
     if (message.words.includes('#achievements')) {
-      actions.push({function: stairs.onStairsAchievements, args: [db, config, achievements]})
+      actions.push(stairs.onStairsAchievements)
     }
 
-    return actions.reduce((promise, action) => promise.then(() => action.function(message, ...action.args)), Promise.resolve())
+    return actions.reduce((promise, action) => promise.then(() => action(message, appData)), Promise.resolve())
       .catch(onError)
   }
 
@@ -45,6 +54,8 @@ function FitnessBot (config) {
   } else {
     config.adapter.on('message', onMessage)
   }
+
+  init()
 
   console.log('Started listening for messages')
 

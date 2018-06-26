@@ -1,26 +1,26 @@
 const Table = require('cli-table2')
 
-function onStairsDone (message, db, config, achievements) {
+function onStairsDone (message, appData) {
   const number = message.words[message.words.indexOf(message.doneHash) + 1]
-  const floors = number && number.match(/^\d+/) ? Number(number) : config.floors
+  const floors = number && number.match(/^\d+/) ? Number(number) : appData.config.floors
 
   console.log(`#std ${message.author.name} ${floors}`)
 
-  return db.query('INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2', [message.author.id, message.author.name])
-    .then(() => db.query('INSERT INTO runs (user_id, floors) VALUES ($1, $2, $3)', [message.author.id, floors]))
+  return appData.db.query('INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2', [message.author.id, message.author.name])
+    .then(() => appData.db.query('INSERT INTO runs (user_id, floors) VALUES ($1, $2, $3)', [message.author.id, floors]))
     .then(() => message.tag('#gg'))
-    .then(() => db.query('SELECT SUM(floors) AS total FROM runs'))
-    .then(res => res[0].total * config.floorHeight)
+    .then(() => appData.db.query('SELECT SUM(floors) AS total FROM runs'))
+    .then(res => res[0].total * appData.config.floorHeight)
     .then(total => {
       console.log(`#total ${total}`)
       return total
     })
-    .then(total => achievements.find(({ height }) => height > (total - (floors * config.floorHeight)) && height <= total))
+    .then(total => appData.achievements.find(({ height }) => height > (total - (floors * appData.config.floorHeight)) && height <= total))
     .then(achievement => achievement && message.send(`@team, you just reached the ${achievement.name} (${achievement.location}), with a total of ${achievement.height} meters!`))
 }
 
-function onStairsLeaderboard (message, db) {
-  return db.query(`
+function onStairsLeaderboard (message, appData) {
+  return appData.db.query(`
           WITH recent_users
             AS (
                   SELECT users.*
@@ -50,20 +50,20 @@ function onStairsLeaderboard (message, db) {
     })
 }
 
-function onStairsAchievements (message, db, config, achievements) {
-  return db.query('SELECT SUM(floors) AS total FROM runs')
-    .then(res => res[0].total * config.floorHeight)
+function onStairsAchievements (message, appData) {
+  return appData.db.query('SELECT SUM(floors) AS total FROM runs')
+    .then(res => res[0].total * appData.config.floorHeight)
     .then(total => {
       const table = new Table({
         head: ['#', 'name', 'location', 'height'],
         style: { head: [], border: [] }
       })
 
-      const next = achievements.find(({ height }) => height > total)
+      const next = appData.achievements.find(({ height }) => height > total)
       const leftMeters = next.height - total
-      const leftRuns = leftMeters / config.floorHeight / config.floors
+      const leftRuns = leftMeters / appData.config.floorHeight / appData.config.floors
 
-      achievements.forEach(({ name, location, height }) => table.push([total >= height ? '✓' : '✗', name, location, `${height} meters`]))
+      appData.achievements.forEach(({ name, location, height }) => table.push([total >= height ? '✓' : '✗', name, location, `${height} meters`]))
 
       return Promise.all([
         message.send('```\n' + table.toString() + '\n```'),
