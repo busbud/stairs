@@ -1,7 +1,7 @@
 {
   "name": "@busbud/stairs",
   "version": "1.0.0",
-  "description": "Busbud's bot for stair climbing achievements.",
+  "description": "Busbud's bot for all things fitness, including stair climbing and bike riding achievements.",
   "homepage": "https://github.com/busbud/stairs",
   "bugs": {
     "url": "https://github.com/busbud/stairs/issues"
@@ -16,15 +16,16 @@
     "url": "https://github.com/busbud/stairs.git"
   },
   "scripts": {
-    "test": "standard"
+    "lint:fix": "standard --fix",
+    "lint": "standard",
+    "test": "npm run lint"
   },
   "dependencies": {
     "cli-table2": "^0.2.0",
-    "node-uuid": "^1.4.7",
     "pg-promise": "^4.2.3"
   },
   "devDependencies": {
-    "standard": "^7.0.1"
+    "standard": "11.0.1"
   },
   "standard": {
     "ignore": [
