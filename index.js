@@ -65,6 +65,10 @@ function FitnessBot (config) {
     if (message.words.includes('#lead') || message.words.includes('#leaderboard')) {
       actions.push(overview.onOverviewLeaderboard)
     }
+    if (message.words.includes('#help')) {
+      actions.push(overview.onHelp)
+    }
+
 
     return actions.reduce((promise, action) => promise.then(() => action(message, state)), Promise.resolve())
       .catch(onError)
