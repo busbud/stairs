@@ -1,18 +1,25 @@
 const Table = require('cli-table2')
 
-function onStairsDone (message, state) {
+const helpers = require('./helpers')
+
+
+async function onStairsDone (message, state) {
   const number = message.words[message.words.indexOf(message.doneHash) + 1]
   const floors = number && number.match(/^\d+/) ? Number(number) : state.config.floors
+  const commandTarget = await helpers.getCommandTarget(message, state);
 
-  console.log(`#std ${message.author.name} ${floors}`)
-
-  return state.db.query('INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2', [message.author.id, message.author.name])
-    .then(() => state.db.query('INSERT INTO runs (user_id, floors) VALUES ($1, $2)', [message.author.id, floors]))
-    .then(() => message.tag('#gg'))
-    .then(() => state.db.query('SELECT SUM(floors) AS total FROM runs'))
-    .then(res => res[0].total * state.config.floorHeight)
-    .then(total => state.achievements.find(({ height }) => height > (total - (floors * state.config.floorHeight)) && height <= total))
-    .then(achievement => achievement && message.send(`@team, you just reached the ${achievement.name} (${achievement.location}), with a total of ${achievement.height} meters!`))
+  if (commandTarget) {
+    await state.db.query('INSERT INTO runs (user_id, floors) VALUES ($1, $2)', [commandTarget.id, floors])
+    await message.tag('#gg')
+    const res = state.db.query('SELECT SUM(floors) AS total FROM runs')
+    const total = res[0].total * state.config.floorHeight
+    const achievement = state.achievements.find(({ height }) => height > (total - (floors * state.config.floorHeight)) && height <= total)
+    if (achievement) {
+      await message.send(`@team, you just reached the ${achievement.name} (${achievement.location}), with a total of ${achievement.height} meters!`)
+    }
+  } else {
+    await message.send('Failed to register stairs')
+  }
 }
 
 function onStairsLeaderboard (message, state) {
@@ -37,7 +44,7 @@ function onStairsLeaderboard (message, state) {
     `)
     .then(rows => {
       const table = new Table({
-        head: ['#', 'name', 'floors'],
+        head: ['Rank', 'Name', 'Floors'],
         style: { head: [], border: [] }
       })
 
@@ -51,7 +58,7 @@ function onStairsAchievements (message, state) {
     .then(res => res[0].total * state.config.floorHeight)
     .then(total => {
       const table = new Table({
-        head: ['#', 'name', 'location', 'height'],
+        head: ['Rank', 'Name', 'Location', 'Height (m)'],
         style: { head: [], border: [] }
       })
 

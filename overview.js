@@ -50,7 +50,7 @@ async function onOverviewLeaderboard (message, state) {
     `)
 
   const table = new Table({
-    head: ['# stairs', 'name', 'floors', '# bike', 'name', 'distance in km'],
+    head: ['Stairs Rank', 'Name', 'Floors', '  ', 'Bike Rank', 'Name', 'Distance (km)'],
     style: { head: [], border: [] }
   })
 
@@ -58,7 +58,7 @@ async function onOverviewLeaderboard (message, state) {
   for (let i = 0; i < maxRows; i++) {
     const stairsRow = stairsRows[i] || _getPlaceholder();
     const bikeRow = bikeRows[i] || _getPlaceholder();
-    table.push([i + 1, stairsRow.name, stairsRow.floors, i + 1, bikeRow.name, bikeRow.distance_km])
+    table.push([i + 1, stairsRow.name, stairsRow.floors, '  ', i + 1, bikeRow.name, bikeRow.distance_km])
   }
   await message.send('```\n' + table.toString() + '\n```')
 }
