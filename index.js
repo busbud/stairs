@@ -1,6 +1,8 @@
 const pg = require('pg-promise')()
 
-const stairs = require('stairs')
+const bike = require('./bike.js')
+const stairs = require('./stairs.js')
+const overview = require('./overview.js')
 
 class State {
   constructor (achievements, config, db) {
@@ -16,7 +18,7 @@ function FitnessBot (config) {
   let state
 
   function init () {
-    db.query('SELECT * FROM achievements ORDER BY height')
+    return db.query('SELECT * FROM achievements ORDER BY height')
       .then(res => {
         state = new State(res, config, db)
       })
@@ -31,17 +33,37 @@ function FitnessBot (config) {
     message = Object.assign({}, message, { words: message.text.split(/(?::|,|!|\.|\?)?(?: +|$)/) })
     const actions = []
 
+    // Stairs Commands
     if (message.words.includes('#std')) {
       message.doneHash = '#std'
       actions.push(stairs.onStairsDone)
     }
 
-    if (message.words.includes('#lead') || message.words.includes('#leaderboard')) {
+    if (message.words.includes('#stairs-lead') || message.words.includes('#stairs-leaderboard')) {
       actions.push(stairs.onStairsLeaderboard)
     }
 
-    if (message.words.includes('#achievements')) {
+    if (message.words.includes('#stairs-achievements')) {
       actions.push(stairs.onStairsAchievements)
+    }
+
+    // Bike Commands
+    if (message.words.includes('#btw')) {
+      message.doneHash = '#btw'
+      actions.push(bike.onBikeDone)
+    }
+
+    if (message.words.includes('#bike-lead') || message.words.includes('#bike-leaderboard')) {
+      actions.push(bike.onBikeLeaderboard)
+    }
+
+    if (message.words.includes('#bike-achievements')) {
+      actions.push(bike.onBikeAchievements)
+    }
+
+    // Overview Commands
+    if (message.words.includes('#lead') || message.words.includes('#leaderboard')) {
+      actions.push(overview.onOverviewLeaderboard)
     }
 
     return actions.reduce((promise, action) => promise.then(() => action(message, state)), Promise.resolve())
@@ -55,10 +77,6 @@ function FitnessBot (config) {
     config.adapter.on('message', onMessage)
   }
 
-  init()
-
-  console.log('Started listening for messages')
-
   fitnessBot.end = () => {
     db.end()
 
@@ -67,7 +85,10 @@ function FitnessBot (config) {
     }
   }
 
-  return fitnessBot
+  init().then(() => {
+    console.log('Started listening for messages')
+    return fitnessBot
+  })
 }
 
 module.exports = FitnessBot
