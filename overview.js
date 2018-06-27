@@ -50,7 +50,7 @@ async function onOverviewLeaderboard (message, state) {
     `)
 
   const table = new Table({
-    head: ['# stairs', 'name', 'floors', '# bike', 'name', 'distance in km'],
+    head: ['Stairs Rank', 'Name', 'Floors', '  ', 'Bike Rank', 'Name', 'Distance (km)'],
     style: { head: [], border: [] }
   })
 
@@ -58,12 +58,28 @@ async function onOverviewLeaderboard (message, state) {
   for (let i = 0; i < maxRows; i++) {
     const stairsRow = stairsRows[i] || _getPlaceholder();
     const bikeRow = bikeRows[i] || _getPlaceholder();
-    table.push([i + 1, stairsRow.name, stairsRow.floors, i + 1, bikeRow.name, bikeRow.distance_km])
+    table.push([i + 1, stairsRow.name, stairsRow.floors, '  ', i + 1, bikeRow.name, bikeRow.distance_km])
   }
   await message.send('```\n' + table.toString() + '\n```')
 }
 
+async function onHelp (message, state) {
+  const helpText = `Here's all the fitness commands:
+* \`#std\`: records stairs session, stands for "stairs done" (${state.config.floors} by default)
+* \`#std <floors>\`: records stairs session of specific amount of floors (e.g. \`#std 5\`)
+* \`#stairs-lead\`: shows stairs leaderboard
+* \`#stairs-achievements\`: shows stairs achievements
+* \`#btw\`: records bike session, stands for "biked to work"
+* \`#btw <distance>\`: records bike session of specific distance (e.g. \`#btw 6.2\`), the first time you do it will set as default
+* \`#btw <distance> #save\`: records bike session and saves over previous default
+* \`#bike-lead\`: shows bike leaderboard
+* \`#bike-achievements\`: shows bike achievements
+* \`#lead\`: shows company leaderboard
+* \`#help\`: show this message`
+  message.send(helpText)
+}
 
 module.exports = {
-  onOverviewLeaderboard
+  onOverviewLeaderboard,
+  onHelp
 }

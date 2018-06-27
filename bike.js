@@ -1,5 +1,7 @@
 const Table = require('cli-table2')
 
+const helpers = require('./helpers')
+
 
 async function _getUserBikedToWorkDistance(state, userId) {
   const rows = await state.db.query('SELECT * FROM users WHERE id = $1', [userId + ''])
@@ -8,8 +10,8 @@ async function _getUserBikedToWorkDistance(state, userId) {
   return user.biked_to_work_distance
 }
 
-async function _setUserBikedToWorkDistance(state, message, distanceMeters) {
-  const userId = message.author.id
+async function _setUserBikedToWorkDistance(state, message, commandTarget, distanceMeters) {
+  const userId = commandTarget.id
   await state.db.query('UPDATE users SET biked_to_work_distance = $1 WHERE id = $2', [distanceMeters, userId + ''])
   message.raw.tags.push('#bike-distance-saved')
 }
@@ -19,20 +21,20 @@ async function _hasUserBikedToWorkBefore(state, userId) {
   return parseInt(rows[0].count, 10) > 0
 }
 
-async function _handleDistanceInputAbsentForBikeDone(message, state, hasBikedToWorkBefore) {
+async function _handleDistanceInputAbsentForBikeDone(message, state, commandTarget, hasBikedToWorkBefore) {
   if (hasBikedToWorkBefore) {
     // Regular ride
-    return await _getUserBikedToWorkDistance(state, message.author.id)
+    return await _getUserBikedToWorkDistance(state, commandTarget.id)
   }
   // First ride
   await message.send('You haven\'t biked to work yet, please put the number of km you ride to work after the hashtag.')
   return null
 }
 
-async function _handleDistanceInputPresentForBikeDone(message, state, hasBikedToWorkBefore, distanceMeters) {
+async function _handleDistanceInputPresentForBikeDone(message, state, commandTarget, hasBikedToWorkBefore, distanceMeters) {
   if (!hasBikedToWorkBefore) {
     // First ride
-    await _setUserBikedToWorkDistance(state, message, distanceMeters)
+    await _setUserBikedToWorkDistance(state, message, commandTarget, distanceMeters)
     await message.send('This is your first ride! Your input distance has been saved as your regular biking distance.')
   } else {
     // Irregular ride, or the user wishes to save his regular bike distance
@@ -42,13 +44,13 @@ async function _handleDistanceInputPresentForBikeDone(message, state, hasBikedTo
   }
 }
 
-async function _getBikeDistanceMetersToSave(message, state, distanceKm) {
-  const hasBikedToWorkBefore = await _hasUserBikedToWorkBefore(state, message.author.id)
+async function _getBikeDistanceMetersToSave(message, state, commandTarget, distanceKm) {
+  const hasBikedToWorkBefore = await _hasUserBikedToWorkBefore(state, commandTarget.id)
 
   let distanceMeters;
   if (distanceKm === null) {
     // No input of distance. Either user's first ride or regular ride
-    distanceMeters = await _handleDistanceInputAbsentForBikeDone(message, state, hasBikedToWorkBefore)
+    distanceMeters = await _handleDistanceInputAbsentForBikeDone(message, state, commandTarget, hasBikedToWorkBefore)
   } else {
     // Manual input of distance. Either user's first ride or irregular ride
     distanceMeters = distanceKm * 1000
@@ -57,12 +59,15 @@ async function _getBikeDistanceMetersToSave(message, state, distanceKm) {
   return distanceMeters
 }
 
-async function _saveBikeRun (message, state, distanceMeters) {
+async function _saveBikeRun (message, state, commandTarget, distanceMeters) {
   if (!distanceMeters) {
     await message.tag('#no-distance-given')
-  } else {
+  } else if (!commandTarget) {
+    await message.send('Failed to register stairs')
+  }
+  else {
     // Save the run
-    await state.db.query('INSERT INTO bike_runs (user_id, distance) VALUES ($1, $2)', [message.author.id, distanceMeters])
+    await state.db.query('INSERT INTO bike_runs (user_id, distance) VALUES ($1, $2)', [commandTarget.id, distanceMeters])
     await message.tag('#gg')
     const rows = await state.db.query('SELECT SUM(distance) AS total FROM bike_runs')
     const total = rows[0].total
@@ -74,17 +79,15 @@ async function _saveBikeRun (message, state, distanceMeters) {
 }
 
 async function onBikeDone (message, state) {
-  await state.db.query('INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2', [message.author.id, message.author.name])
-
   const number = message.words[message.words.indexOf(message.doneHash) + 1]
   const distanceKm = number && number.match(/^-?\d+/) ? Number(number) : null
-  console.log(`#btw ${message.author.name} ${distanceKm}`);
-
+  
   if (distanceKm && distanceKm < 0) {
     await message.send('Did you bike backwards?')
   } else {
-    const distanceMeters = await _getBikeDistanceMetersToSave(message, state, distanceKm)
-    await _saveBikeRun(message, state, distanceMeters)
+    const commandTarget = await helpers.getCommandTarget(message, state);
+    const distanceMeters = await _getBikeDistanceMetersToSave(message, state, commandTarget, distanceKm)
+    await _saveBikeRun(message, state, commandTarget, distanceMeters)
   }
 }
 
@@ -110,7 +113,7 @@ function onBikeLeaderboard (message, state) {
     `)
     .then(rows => {
       const table = new Table({
-        head: ['#', 'name', 'distance in km'],
+        head: ['Rank', 'Name', 'Distance (km)'],
         style: { head: [], border: [] }
       })
 
@@ -124,7 +127,7 @@ function onBikeAchievements (message, state) {
     .then(res => res[0].total)
     .then(total => {
       const table = new Table({
-        head: ['#', 'name', 'location', 'distance in km'],
+        head: ['Rank', 'Name', 'Location', 'Distance (km)'],
         style: { head: [], border: [] }
       })
 
