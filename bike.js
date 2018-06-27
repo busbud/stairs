@@ -80,10 +80,15 @@ async function _saveBikeRun (message, state, commandTarget, distanceMeters) {
 
 async function onBikeDone (message, state) {
   const number = message.words[message.words.indexOf(message.doneHash) + 1]
-  const distanceKm = number && number.match(/^\d+/) ? Number(number) : null
-  const commandTarget = await helpers.getCommandTarget(message, state);
-  const distanceMeters = await _getBikeDistanceMetersToSave(message, state, commandTarget, distanceKm)
-  await _saveBikeRun(message, state, commandTarget, distanceMeters)
+  const distanceKm = number && number.match(/^-?\d+/) ? Number(number) : null
+  
+  if (distanceKm && distanceKm < 0) {
+    await message.send('Did you bike backwards?')
+  } else {
+    const commandTarget = await helpers.getCommandTarget(message, state);
+    const distanceMeters = await _getBikeDistanceMetersToSave(message, state, commandTarget, distanceKm)
+    await _saveBikeRun(message, state, commandTarget, distanceMeters)
+  }
 }
 
 function onBikeLeaderboard (message, state) {
