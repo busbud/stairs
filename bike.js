@@ -77,12 +77,15 @@ async function onBikeDone (message, state) {
   await state.db.query('INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2', [message.author.id, message.author.name])
 
   const number = message.words[message.words.indexOf(message.doneHash) + 1]
-  const distanceKm = number && number.match(/^\d+/) ? Number(number) : null
+  const distanceKm = number && number.match(/^-?\d+/) ? Number(number) : null
   console.log(`#btw ${message.author.name} ${distanceKm}`);
 
-  const distanceMeters = await _getBikeDistanceMetersToSave(message, state, distanceKm)
-
-  await _saveBikeRun(message, state, distanceMeters)
+  if (distanceKm && distanceKm < 0) {
+    await message.send('Did you bike backwards?')
+  } else {
+    const distanceMeters = await _getBikeDistanceMetersToSave(message, state, distanceKm)
+    await _saveBikeRun(message, state, distanceMeters)
+  }
 }
 
 function onBikeLeaderboard (message, state) {
