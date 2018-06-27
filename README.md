@@ -21,6 +21,7 @@ const Flowdock = require('stdbot-flowdock')
 FitnessBot({
   floors: process.env.STAIRS_FLOORS,
   floorHeight: process.env.STAIRS_FLOOR_HEIGHT,
+  botName: process.env.FITNESS_BOT_NAME,
   db: process.env.DATABASE_URL,
   adapter: Stdbot(Flowdock({
     flows: process.env.FLOWDOCK_FLOWS.split(','),
