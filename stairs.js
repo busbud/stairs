@@ -7,14 +7,10 @@ function onStairsDone (message, state) {
   console.log(`#std ${message.author.name} ${floors}`)
 
   return state.db.query('INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2', [message.author.id, message.author.name])
-    .then(() => state.db.query('INSERT INTO runs (user_id, floors) VALUES ($1, $2, $3)', [message.author.id, floors]))
+    .then(() => state.db.query('INSERT INTO runs (user_id, floors) VALUES ($1, $2)', [message.author.id, floors]))
     .then(() => message.tag('#gg'))
     .then(() => state.db.query('SELECT SUM(floors) AS total FROM runs'))
     .then(res => res[0].total * state.config.floorHeight)
-    .then(total => {
-      console.log(`#total ${total}`)
-      return total
-    })
     .then(total => state.achievements.find(({ height }) => height > (total - (floors * state.config.floorHeight)) && height <= total))
     .then(achievement => achievement && message.send(`@team, you just reached the ${achievement.name} (${achievement.location}), with a total of ${achievement.height} meters!`))
 }
@@ -67,7 +63,7 @@ function onStairsAchievements (message, state) {
 
       return Promise.all([
         message.send('```\n' + table.toString() + '\n```'),
-        message.send(`${Math.round(leftRuns)} runs (${Math.round(leftMeters)} meters) left for next achievement (${next.name}).`)
+        message.send(`${Math.ceil(leftRuns)} runs (${Math.round(leftMeters)} meters) left for next achievement (${next.name}).`)
       ])
     })
 }
