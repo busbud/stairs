@@ -81,7 +81,7 @@ async function _saveBikeRun (message, state, commandTarget, distanceMeters) {
 async function onBikeDone (message, state) {
   const number = message.words[message.words.indexOf(message.doneHash) + 1]
   const distanceKm = number && number.match(/^-?\d+/) ? Number(number) : null
-  
+
   if (distanceKm && distanceKm < 0) {
     await message.send('Did you bike backwards?')
   } else {
@@ -132,10 +132,20 @@ function onBikeAchievements (message, state) {
       })
 
       const next = state.achievements.find(({ height }) => height > total)
+      const nextAchievementIndex = state.achievements.indexOf(next)
+      const maxIndex = state.achievements.length - 1
+      const firstDisplayedAchievementIndex = Math.max(0, nextAchievementIndex - 5)
+      const lastDisplayedAchievementIndex = Math.min(maxIndex, nextAchievementIndex + 5)
+
       const leftMeters = next.height - total
       const leftKm = leftMeters / 1000
 
-      state.achievements.forEach(({ name, location, height }) => table.push([total >= height ? '✓' : '✗', name, location, `${height / 1000} km`]))
+      for(let i = 0; i < state.achievements.length; i++) {
+        if (i >= firstDisplayedAchievementIndex && i <= lastDisplayedAchievementIndex) {
+          const { name, location, height } = state.achievements[i]
+          table.push([total >= height ? '✓' : '✗', name, location, `${height} meters`])
+        }
+      }
 
       return Promise.all([
         message.send('```\n' + table.toString() + '\n```'),
