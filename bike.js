@@ -38,7 +38,7 @@ async function _handleDistanceInputPresentForBikeDone (message, state, commandTa
   } else {
     // Irregular ride, or the user wishes to save his regular bike distance
     if (message.words.includes('#save')) {
-      await _setUserBikedToWorkDistance(state, message, distanceMeters)
+      await _setUserBikedToWorkDistance(state, message, commandTarget, distanceMeters)
     }
   }
 }
@@ -53,7 +53,7 @@ async function _getBikeDistanceMetersToSave (message, state, commandTarget, dist
   } else {
     // Manual input of distance. Either user's first ride or irregular ride
     distanceMeters = distanceKm * 1000
-    if (distanceMeters) await _handleDistanceInputPresentForBikeDone(message, state, hasBikedToWorkBefore, distanceMeters)
+    if (distanceMeters) await _handleDistanceInputPresentForBikeDone(message, state, commandTarget, hasBikedToWorkBefore, distanceMeters)
   }
   return distanceMeters
 }
