@@ -11,7 +11,7 @@ async function onStairsDone (message, state) {
   if (commandTarget) {
     await state.db.query('INSERT INTO runs (user_id, floors) VALUES ($1, $2)', [commandTarget.id, floors])
     await message.tag('#gg')
-    const res = state.db.query('SELECT SUM(floors) AS total FROM runs')
+    const res = await state.db.query('SELECT SUM(floors) AS total FROM runs')
     const total = res[0].total * state.config.floorHeight
     const achievement = state.achievements.find(({ height }) => height > (total - (floors * state.config.floorHeight)) && height <= total)
     if (achievement) {
