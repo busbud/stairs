@@ -29,7 +29,7 @@
   },
   "standard": {
     "ignore": [
-      "/hubot"
+      "hubot/node_modules"
     ]
   }
 }

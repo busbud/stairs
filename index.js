@@ -69,7 +69,6 @@ function FitnessBot (config) {
       actions.push(overview.onHelp)
     }
 
-
     return actions.reduce((promise, action) => promise.then(() => action(message, state)), Promise.resolve())
       .catch(onError)
   }

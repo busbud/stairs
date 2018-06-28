@@ -2,11 +2,10 @@ const Table = require('cli-table2')
 
 const helpers = require('./helpers')
 
-
 async function onStairsDone (message, state) {
   const number = message.words[message.words.indexOf(message.doneHash) + 1]
   const floors = number && number.match(/^\d+/) ? Number(number) : state.config.floors
-  const commandTarget = await helpers.getCommandTarget(message, state);
+  const commandTarget = await helpers.getCommandTarget(message, state)
 
   if (commandTarget) {
     await state.db.query('INSERT INTO runs (user_id, floors) VALUES ($1, $2)', [commandTarget.id, floors])

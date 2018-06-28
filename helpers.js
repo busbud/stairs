@@ -1,4 +1,4 @@
-function isValidBotCommand(message, state) {
+function isValidBotCommand (message, state) {
   const firstWord = message.words[0]
   const isMessageFromBot = message.author.name === state.config.botName
   const unauthorizedTargets = [message.author.name, state.config.botName]
@@ -6,14 +6,14 @@ function isValidBotCommand(message, state) {
   return firstWordIsValidTarget && isMessageFromBot
 }
 
-async function getUserByName(state, name) {
+async function getUserByName (state, name) {
   const rows = await state.db.query('SELECT * FROM users WHERE name = $1', [name])
   if (rows.length !== 1) return null
   return rows[0]
 }
 
-async function getCommandTarget(message, state) {
-  let commandTarget;
+async function getCommandTarget (message, state) {
+  let commandTarget
   if (isValidBotCommand(message, state)) {
     const targetUserName = message.words[0].slice(1)
     commandTarget = await getUserByName(state, targetUserName)

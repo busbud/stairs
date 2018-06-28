@@ -1,6 +1,6 @@
 const Table = require('cli-table2')
 
-function _getPlaceholder() {
+function _getPlaceholder () {
   return {
     name: '-',
     floors: '-',
@@ -54,12 +54,14 @@ async function onOverviewLeaderboard (message, state) {
     style: { head: [], border: [] }
   })
 
-  const maxRows = Math.max(stairsRows.length, bikeRows.length);
+  const maxRows = Math.max(stairsRows.length, bikeRows.length)
+
   for (let i = 0; i < maxRows; i++) {
-    const stairsRow = stairsRows[i] || _getPlaceholder();
-    const bikeRow = bikeRows[i] || _getPlaceholder();
+    const stairsRow = stairsRows[i] || _getPlaceholder()
+    const bikeRow = bikeRows[i] || _getPlaceholder()
     table.push([i + 1, stairsRow.name, stairsRow.floors, '  ', i + 1, bikeRow.name, bikeRow.distance_km])
   }
+
   await message.send('```\n' + table.toString() + '\n```')
 }
 
@@ -76,7 +78,8 @@ async function onHelp (message, state) {
 * \`#bike-achievements\`: shows bike achievements
 * \`#lead\`: shows company leaderboard
 * \`#help\`: show this message`
-  message.send(helpText)
+
+  await message.send(helpText)
 }
 
 module.exports = {
