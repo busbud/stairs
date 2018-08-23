@@ -5,7 +5,7 @@
   "dependencies": {
     "@busbud/stairs": "busbud/stairs",
     "stdbot": "^0.3.0",
-    "stdbot-flowdock": "^0.4.1"
+    "stdbot-slack": "^0.6.0"
   },
   "engines": {
     "node": "^6.0.0"
