@@ -7,7 +7,7 @@ function isValidBotCommand (message, state) {
 }
 
 async function getUserByName (state, name) {
-  const rows = await state.db.query('SELECT * FROM users WHERE name = $1', [name])
+  const rows = await state.db.query('SELECT * FROM users WHERE name = $1 LIMIT 1', [name])
   if (rows.length !== 1) return null
   return rows[0]
 }

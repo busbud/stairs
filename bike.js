@@ -85,7 +85,7 @@ async function onBikeDone (message, state) {
   } else {
     const commandTarget = await helpers.getCommandTarget(message, state)
     const distanceMeters = await _getBikeDistanceMetersToSave(message, state, commandTarget, distanceKm)
-    await _saveBikeRun(message, state, commandTarget, distanceMeters)
+    if (distanceMeters) await _saveBikeRun(message, state, commandTarget, distanceMeters)
   }
 }
 
