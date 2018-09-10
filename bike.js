@@ -12,7 +12,6 @@ async function _getUserBikedToWorkDistance (state, userId) {
 async function _setUserBikedToWorkDistance (state, message, commandTarget, distanceMeters) {
   const userId = commandTarget.id
   await state.db.query('UPDATE users SET biked_to_work_distance = $1 WHERE id = $2', [distanceMeters, userId + ''])
-  message.raw.tags.push('#bike-distance-saved')
 }
 
 async function _hasUserBikedToWorkBefore (state, userId) {
@@ -39,6 +38,7 @@ async function _handleDistanceInputPresentForBikeDone (message, state, commandTa
     // Irregular ride, or the user wishes to save his regular bike distance
     if (message.words.includes('#save')) {
       await _setUserBikedToWorkDistance(state, message, commandTarget, distanceMeters)
+      await message.send('New distance saved!')
     }
   }
 }
@@ -60,13 +60,13 @@ async function _getBikeDistanceMetersToSave (message, state, commandTarget, dist
 
 async function _saveBikeRun (message, state, commandTarget, distanceMeters) {
   if (!distanceMeters) {
-    await message.tag('#no-distance-given')
+    await message.send('No distance given')
   } else if (!commandTarget) {
-    await message.send('Failed to register stairs')
+    await message.send('Failed to register run')
   } else {
     // Save the run
     await state.db.query('INSERT INTO bike_runs (user_id, distance) VALUES ($1, $2)', [commandTarget.id, distanceMeters])
-    await message.tag('#gg')
+    await message.send('GG!')
     const rows = await state.db.query('SELECT SUM(distance) AS total FROM bike_runs')
     const total = rows[0].total
     const achievement = state.achievements.find(({ height }) => height > (total - distanceMeters) && height <= total)
