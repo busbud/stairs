@@ -66,7 +66,7 @@ async function _saveBikeRun (message, state, commandTarget, distanceMeters) {
   } else {
     // Save the run
     await state.db.query('INSERT INTO bike_runs (user_id, distance) VALUES ($1, $2)', [commandTarget.id, distanceMeters])
-    await message.send('GG!')
+    await message.react('muscle')
     const rows = await state.db.query('SELECT SUM(distance) AS total FROM bike_runs')
     const total = rows[0].total
     const achievement = state.achievements.find(({ height }) => height > (total - distanceMeters) && height <= total)
