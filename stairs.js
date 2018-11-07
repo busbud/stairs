@@ -2,6 +2,10 @@ const Table = require('cli-table2')
 
 const helpers = require('./helpers')
 
+const stepsPerFloor = 20
+const stepsObjective = 100000
+const movemberStart = '2018-11-07'
+
 async function onStairsDone (message, state) {
   const number = message.words[message.words.indexOf(message.doneHash) + 1]
   const floors = number && number.match(/^\d+/) ? Number(number) : state.config.floors
@@ -10,15 +14,43 @@ async function onStairsDone (message, state) {
   if (commandTarget) {
     await state.db.query('INSERT INTO runs (user_id, floors) VALUES ($1, $2)', [commandTarget.id, floors])
     await message.react('muscle')
-    const res = await state.db.query('SELECT SUM(floors) AS total FROM runs')
-    const total = res[0].total * state.config.floorHeight
-    const achievement = state.achievements.find(({ height }) => height > (total - (floors * state.config.floorHeight)) && height <= total)
-    if (achievement) {
-      await message.send(`@team, you just reached the ${achievement.name} (${achievement.location}), with a total of ${achievement.height} meters!`)
+
+    const res = await state.db.query(`SELECT SUM(floors) AS total FROM runs WHERE created_at > '${movemberStart}'`)
+
+    const totalFloors = res[0].total || 0
+    const totalSteps = totalFloors * stepsPerFloor
+    const objectiveRatio = totalSteps / stepsObjective
+    const objectivePercent = Math.floor(objectiveRatio * 100)
+    const lowerDozen = objectivePercent - (objectivePercent % 10)
+    const previousTotalSteps = totalSteps - (floors * stepsPerFloor)
+    const previousObjectiveRatio = previousTotalSteps / stepsObjective
+    const previousObjectivePercent = Math.floor(previousObjectiveRatio * 100)
+    const previousLowerDozen = previousObjectivePercent - (previousObjectivePercent % 10)
+
+    if (lowerDozen > previousLowerDozen) {
+      await message.send(`@here, you're at ${totalSteps} steps (${totalFloors} floors, ${objectivePercent}%) of movember 100 000 steps objective!`)
     }
+
+    // const res = await state.db.query('SELECT SUM(floors) AS total FROM runs')
+    // const total = res[0].total * state.config.floorHeight
+    // const achievement = state.achievements.find(({ height }) => height > (total - (floors * state.config.floorHeight)) && height <= total)
+    // if (achievement) {
+    //   await message.send(`@here, you just reached the ${achievement.name} (${achievement.location}), with a total of ${achievement.height} meters!`)
+    // }
   } else {
     await message.send('Failed to register stairs')
   }
+}
+
+async function onMovember (message, state) {
+  const res = await state.db.query(`SELECT SUM(floors) AS total FROM runs WHERE created_at > '${movemberStart}'`)
+
+  const totalFloors = res[0].total || 0
+  const totalSteps = totalFloors * stepsPerFloor
+  const objectiveRatio = totalSteps / stepsObjective
+  const objectivePercent = Math.floor(objectiveRatio * 100)
+
+  await message.send(`You're at ${totalSteps} steps (${totalFloors} floors, ${objectivePercent}%) of movember 100 000 steps objective!`)
 }
 
 function onStairsLeaderboard (message, state) {
@@ -30,14 +62,13 @@ function onStairsLeaderboard (message, state) {
                     JOIN runs
                       ON runs.user_id = users.id
                 GROUP BY users.id
-                  HAVING max(runs.created_at) > now() - interval '2 months'
                )
         SELECT recent_users.name,
                sum(floors) AS floors
           FROM runs
           JOIN recent_users
             ON recent_users.id = runs.user_id
-         WHERE created_at > date_trunc('year', now())
+         WHERE created_at > '${movemberStart}'
       GROUP BY user_id, recent_users.name
       ORDER BY sum(floors) DESC
     `)
@@ -86,6 +117,7 @@ function onStairsAchievements (message, state) {
 
 module.exports = {
   onStairsDone,
+  onMovember,
   onStairsLeaderboard,
   onStairsAchievements
 }
