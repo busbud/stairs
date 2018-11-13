@@ -138,7 +138,7 @@ function onBikeAchievements (message, state) {
       const leftMeters = next.height - total
       const leftKm = leftMeters / 1000
 
-      for(let i = 0; i < state.achievements.length; i++) {
+      for (let i = 0; i < state.achievements.length; i++) {
         if (i >= firstDisplayedAchievementIndex && i <= lastDisplayedAchievementIndex) {
           const { name, location, height } = state.achievements[i]
           table.push([total >= height ? '✓' : '✗', name, location, `${height} meters`])

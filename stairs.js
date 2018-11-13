@@ -6,6 +6,10 @@ const stepsPerFloor = 20
 const stepsObjective = 100000
 const movemberStart = '2018-11-07'
 
+function formatSteps (steps) {
+  return steps > 1000 ? `${steps / 1000}k` : steps
+}
+
 async function onStairsDone (message, state) {
   const number = message.words[message.words.indexOf(message.doneHash) + 1]
   const floors = number && number.match(/^\d+/) ? Number(number) : state.config.floors
@@ -28,7 +32,7 @@ async function onStairsDone (message, state) {
     const previousLowerDozen = previousObjectivePercent - (previousObjectivePercent % 10)
 
     if (lowerDozen > previousLowerDozen) {
-      await message.send(`@here, you're at ${totalSteps} steps (${totalFloors} floors, ${objectivePercent}%) of movember 100 000 steps objective!`)
+      await message.send(`@here, you're at ${formatSteps(totalSteps)} steps (${totalFloors} floors, ${objectivePercent}%) of movember ${formatSteps(stepsObjective)} steps objective!`)
     }
 
     // const res = await state.db.query('SELECT SUM(floors) AS total FROM runs')
@@ -42,6 +46,13 @@ async function onStairsDone (message, state) {
   }
 }
 
+function getLastDayOfMonth () {
+  const date = new Date()
+  date.setMonth(date.getMonth() + 1)
+  date.setDate(0)
+  return date.getDate()
+}
+
 async function onMovember (message, state) {
   const res = await state.db.query(`SELECT SUM(floors) AS total FROM runs WHERE created_at > '${movemberStart}'`)
 
@@ -49,8 +60,15 @@ async function onMovember (message, state) {
   const totalSteps = totalFloors * stepsPerFloor
   const objectiveRatio = totalSteps / stepsObjective
   const objectivePercent = Math.floor(objectiveRatio * 100)
+  const dayOfMonth = new Date().getDay()
+  const lastDayOfMonth = getLastDayOfMonth()
+  const remainingDays = lastDayOfMonth - dayOfMonth
+  const remainingSteps = stepsObjective - totalSteps
+  const remainingStepsPerDay = remainingSteps / remainingDays
+  const remainingRunsPerDay = remainingStepsPerDay / (stepsPerFloor * state.config.floors)
 
-  await message.send(`You're at ${totalSteps} steps (${totalFloors} floors, ${objectivePercent}%) of movember 100 000 steps objective!`)
+  await message.send(`You're at ${formatSteps(totalSteps)} steps (${totalFloors} floors, ${objectivePercent}%) of movember ${formatSteps(stepsObjective)} steps objective!
+You need an average of ${remainingRunsPerDay} climbs a day to reach the objective by the end of the month.`)
 }
 
 function onStairsLeaderboard (message, state) {
@@ -101,7 +119,7 @@ function onStairsAchievements (message, state) {
       const leftMeters = next.height - total
       const leftRuns = leftMeters / state.config.floorHeight / state.config.floors
 
-      for(let i = 0; i < state.achievements.length; i++) {
+      for (let i = 0; i < state.achievements.length; i++) {
         if (i >= firstDisplayedAchievementIndex && i <= lastDisplayedAchievementIndex) {
           const { name, location, height } = state.achievements[i]
           table.push([total >= height ? '✓' : '✗', name, location, `${height} meters`])
