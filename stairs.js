@@ -7,7 +7,7 @@ const stepsObjective = 100000
 const movemberStart = '2018-11-07'
 
 function formatSteps (steps) {
-  return steps > 1000 ? `${steps / 1000}k` : steps
+  return steps > 1000 ? `${Math.round(steps / 1000)}k` : steps
 }
 
 async function onStairsDone (message, state) {
@@ -60,7 +60,7 @@ async function onMovember (message, state) {
   const totalSteps = totalFloors * stepsPerFloor
   const objectiveRatio = totalSteps / stepsObjective
   const objectivePercent = Math.floor(objectiveRatio * 100)
-  const dayOfMonth = new Date().getDay()
+  const dayOfMonth = new Date().getDate()
   const lastDayOfMonth = getLastDayOfMonth()
   const remainingDays = lastDayOfMonth - dayOfMonth
   const remainingSteps = stepsObjective - totalSteps
@@ -70,7 +70,8 @@ async function onMovember (message, state) {
   const sorry = currentTotalRunsPerDay < remainingRunsPerDay ? ' (sorry)' : ''
 
   await message.send(`You're at ${formatSteps(totalSteps)} steps (${totalFloors} floors, ${objectivePercent}%) of movember ${formatSteps(stepsObjective)} steps objective!
-You need an average of ${Math.round(remainingRunsPerDay)} climbs a day to reach the objective by the end of the month. So far you did an average of ${Math.round(currentTotalRunsPerDay)}${sorry}.`)
+You need an average of ${Math.round(remainingRunsPerDay)} climbs a day to reach the objective by the end of the month.
+So far you did an average of ${Math.round(currentTotalRunsPerDay)}${sorry}.`)
 }
 
 function onStairsLeaderboard (message, state) {
