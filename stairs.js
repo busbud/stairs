@@ -66,9 +66,11 @@ async function onMovember (message, state) {
   const remainingSteps = stepsObjective - totalSteps
   const remainingStepsPerDay = remainingSteps / remainingDays
   const remainingRunsPerDay = remainingStepsPerDay / (stepsPerFloor * state.config.floors)
+  const currentTotalRunsPerDay = totalFloors / state.config.foors / dayOfMonth
+  const sorry = currentTotalRunsPerDay < remainingRunsPerDay ? ' (sorry)' : ''
 
   await message.send(`You're at ${formatSteps(totalSteps)} steps (${totalFloors} floors, ${objectivePercent}%) of movember ${formatSteps(stepsObjective)} steps objective!
-You need an average of ${Math.round(remainingRunsPerDay)} climbs a day to reach the objective by the end of the month.`)
+You need an average of ${Math.round(remainingRunsPerDay)} climbs a day to reach the objective by the end of the month. So far you did an average of ${Math.round(currentTotalRunsPerDay)}${sorry}.`)
 }
 
 function onStairsLeaderboard (message, state) {
