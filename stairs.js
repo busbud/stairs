@@ -66,7 +66,7 @@ async function onMovember (message, state) {
   const remainingSteps = stepsObjective - totalSteps
   const remainingStepsPerDay = remainingSteps / remainingDays
   const remainingRunsPerDay = remainingStepsPerDay / (stepsPerFloor * state.config.floors)
-  const currentTotalRunsPerDay = totalFloors / state.config.foors / dayOfMonth
+  const currentTotalRunsPerDay = totalFloors / state.config.floors / dayOfMonth
   const sorry = currentTotalRunsPerDay < remainingRunsPerDay ? ' (sorry)' : ''
 
   await message.send(`You're at ${formatSteps(totalSteps)} steps (${totalFloors} floors, ${objectivePercent}%) of movember ${formatSteps(stepsObjective)} steps objective!
