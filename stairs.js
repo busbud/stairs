@@ -5,6 +5,7 @@ const helpers = require('./helpers')
 const stepsPerFloor = 20
 const stepsObjective = 100000
 const movemberStart = '2018-11-07'
+const movemberStartDay = 7
 
 function formatSteps (steps) {
   return steps > 1000 ? `${Math.round(steps / 1000)}k` : steps
@@ -66,7 +67,7 @@ async function onMovember (message, state) {
   const remainingSteps = stepsObjective - totalSteps
   const remainingStepsPerDay = remainingSteps / remainingDays
   const remainingRunsPerDay = remainingStepsPerDay / (stepsPerFloor * state.config.floors)
-  const currentTotalRunsPerDay = totalFloors / state.config.floors / dayOfMonth
+  const currentTotalRunsPerDay = totalFloors / state.config.floors / (dayOfMonth - (movemberStartDay - 1))
   const sorry = currentTotalRunsPerDay < remainingRunsPerDay ? ' (sorry)' : ''
 
   await message.send(`You're at ${formatSteps(totalSteps)} steps (${totalFloors} floors, ${objectivePercent}%) of movember ${formatSteps(stepsObjective)} steps objective!
