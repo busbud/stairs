@@ -63,7 +63,19 @@ async function onMovember (message, state) {
   const objectivePercent = Math.floor(objectiveRatio * 100)
   const dayOfMonth = new Date().getDate()
   const lastDayOfMonth = getLastDayOfMonth()
-  const remainingDays = lastDayOfMonth - dayOfMonth
+  let remainingDays = 0
+
+  for (let currentDay = dayOfMonth; currentDay <= lastDayOfMonth; currentDay++) {
+    const date = new Date()
+    date.setDate(currentDay)
+    const dayOfWeek = date.getDay()
+
+    // Only work days
+    if (dayOfWeek > 0 && dayOfWeek < 6) {
+      remainingDays++
+    }
+  }
+
   const remainingSteps = stepsObjective - totalSteps
   const remainingStepsPerDay = remainingSteps / remainingDays
   const remainingRunsPerDay = remainingStepsPerDay / (stepsPerFloor * state.config.floors)
