@@ -54,6 +54,23 @@ function getLastDayOfMonth () {
   return date.getDate()
 }
 
+function workDaysBetween (start, end) {
+  let days = 0
+
+  for (let currentDay = start; currentDay <= end; currentDay++) {
+    const date = new Date()
+    date.setDate(currentDay)
+    const dayOfWeek = date.getDay()
+
+    // Only work days
+    if (dayOfWeek > 0 && dayOfWeek < 6) {
+      days++
+    }
+  }
+
+  return days
+}
+
 async function onMovember (message, state) {
   const res = await state.db.query(`SELECT SUM(floors) AS total FROM runs WHERE created_at > '${movemberStart}'`)
 
@@ -63,23 +80,11 @@ async function onMovember (message, state) {
   const objectivePercent = Math.floor(objectiveRatio * 100)
   const dayOfMonth = new Date().getDate()
   const lastDayOfMonth = getLastDayOfMonth()
-  let remainingDays = 0
-
-  for (let currentDay = dayOfMonth; currentDay <= lastDayOfMonth; currentDay++) {
-    const date = new Date()
-    date.setDate(currentDay)
-    const dayOfWeek = date.getDay()
-
-    // Only work days
-    if (dayOfWeek > 0 && dayOfWeek < 6) {
-      remainingDays++
-    }
-  }
-
+  const remainingDays = workDaysBetween(dayOfMonth, lastDayOfMonth)
   const remainingSteps = stepsObjective - totalSteps
   const remainingStepsPerDay = remainingSteps / remainingDays
   const remainingRunsPerDay = remainingStepsPerDay / (stepsPerFloor * state.config.floors)
-  const currentTotalRunsPerDay = totalFloors / state.config.floors / (dayOfMonth - (movemberStartDay - 1))
+  const currentTotalRunsPerDay = totalFloors / state.config.floors / workDaysBetween(movemberStartDay, dayOfMonth)
   const sorry = currentTotalRunsPerDay < remainingRunsPerDay ? ' (sorry)' : ''
 
   await message.send(`You're at ${formatSteps(totalSteps)} steps (${totalFloors} floors, ${objectivePercent}%) of movember ${formatSteps(stepsObjective)} steps objective!
