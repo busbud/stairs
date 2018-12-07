@@ -39,6 +39,11 @@ function FitnessBot (config) {
       actions.push(stairs.onStairsDone)
     }
 
+    if (message.words.includes('#stairs')) {
+      message.doneHash = '#stairs'
+      actions.push(stairs.onStairsDone)
+    }
+
     if (message.words.includes('#stairs-lead') || message.words.includes('#stairs-leaderboard')) {
       actions.push(stairs.onStairsLeaderboard)
     }

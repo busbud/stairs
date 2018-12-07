@@ -67,8 +67,8 @@ async function onOverviewLeaderboard (message, state) {
 
 async function onHelp (message, state) {
   const helpText = `Here's all the fitness commands:
-* \`#std\`: records stairs session, stands for "stairs done" (${state.config.floors} by default)
-* \`#std <floors>\`: records stairs session of specific amount of floors (e.g. \`#std 5\`)
+* \`#stairs\`: records stairs session (${state.config.floors} floors by default)
+* \`#stairs <floors>\`: records stairs session of specific amount of floors (e.g. \`#stairs 5\`)
 * \`#stairs-lead\`: shows stairs leaderboard
 * \`#stairs-achievements\`: shows stairs achievements
 * \`#btw\`: records bike session, stands for "biked to work"

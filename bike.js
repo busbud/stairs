@@ -71,7 +71,7 @@ async function _saveBikeRun (message, state, commandTarget, distanceMeters) {
     const total = rows[0].total
     const achievement = state.achievements.find(({ height }) => height > (total - distanceMeters) && height <= total)
     if (achievement) {
-      await message.send(`@team, you just reached the ${achievement.name} (${achievement.location}), with a total of ${achievement.height / 1000} km!`)
+      await message.send(`@here, you just reached the ${achievement.name} (${achievement.location}), with a total of ${achievement.height / 1000} km!`)
     }
   }
 }
@@ -138,7 +138,7 @@ function onBikeAchievements (message, state) {
       const leftMeters = next.height - total
       const leftKm = leftMeters / 1000
 
-      for(let i = 0; i < state.achievements.length; i++) {
+      for (let i = 0; i < state.achievements.length; i++) {
         if (i >= firstDisplayedAchievementIndex && i <= lastDisplayedAchievementIndex) {
           const { name, location, height } = state.achievements[i]
           table.push([total >= height ? '✓' : '✗', name, location, `${height} meters`])

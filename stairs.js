@@ -10,11 +10,13 @@ async function onStairsDone (message, state) {
   if (commandTarget) {
     await state.db.query('INSERT INTO runs (user_id, floors) VALUES ($1, $2)', [commandTarget.id, floors])
     await message.react('muscle')
+
     const res = await state.db.query('SELECT SUM(floors) AS total FROM runs')
     const total = res[0].total * state.config.floorHeight
     const achievement = state.achievements.find(({ height }) => height > (total - (floors * state.config.floorHeight)) && height <= total)
+
     if (achievement) {
-      await message.send(`@team, you just reached the ${achievement.name} (${achievement.location}), with a total of ${achievement.height} meters!`)
+      await message.send(`@here, you just reached the ${achievement.name} (${achievement.location}), with a total of ${achievement.height} meters!`)
     }
   } else {
     await message.send('Failed to register stairs')
@@ -70,7 +72,7 @@ function onStairsAchievements (message, state) {
       const leftMeters = next.height - total
       const leftRuns = leftMeters / state.config.floorHeight / state.config.floors
 
-      for(let i = 0; i < state.achievements.length; i++) {
+      for (let i = 0; i < state.achievements.length; i++) {
         if (i >= firstDisplayedAchievementIndex && i <= lastDisplayedAchievementIndex) {
           const { name, location, height } = state.achievements[i]
           table.push([total >= height ? '✓' : '✗', name, location, `${height} meters`])
