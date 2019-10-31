@@ -12,18 +12,18 @@ async function run() {
   
   function send (message) {
     return stairs.onMessage(Object.assign({
-      send: message => Promise.resolve(message),
+      send: message => console.log(message),
       reply: message => Promise.resolve(message),
       react: text => console.log(text)
     }, message))
   }
   await send({
     author: foo,
-    text: '#stairs'
+    text: '#movember'
   })
   await send({
     author: foo,
-    text: '#stairs 4'
+    text: '#stairs 400'
   })
   await send({
     author: bar,
