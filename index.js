@@ -86,14 +86,13 @@ function FitnessBot (config) {
   }
 
   fitnessBot.end = () => {
-    db.end()
-
+    pg.end();
     if (config.adapter) {
       config.adapter.end()
     }
   }
 
-  init().then(() => {
+  return init().then(() => {
     console.log('Started listening for messages')
     return fitnessBot
   })

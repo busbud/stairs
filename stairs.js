@@ -3,8 +3,15 @@ const Table = require('cli-table2')
 const helpers = require('./helpers')
 
 async function onStairsDone (message, state) {
-  const number = message.words[message.words.indexOf(message.doneHash) + 1]
-  const floors = number && number.match(/^\d+/) ? Number(number) : state.config.floors
+  const parseFloors = (text) => {
+    if (!text) return state.config.floors;
+    if (text === 'nn') return 5;
+    if (text.match(/^\d+/)) return Number(second_arg);
+    return state.config.floors;
+  }
+
+  const second_arg = message.words[message.words.indexOf(message.doneHash) + 1]
+  const floors = parseFloors(second_arg);
   const commandTarget = await helpers.getCommandTarget(message, state)
 
   if (commandTarget) {
