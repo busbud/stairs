@@ -110,7 +110,6 @@ function onStairsAchievements (message, state) {
         const TARGET = 200 * 1000
         const steps_done = floors_done * 20
         const pct = 100 * steps_done / TARGET
-        console.log({pct})
         
         const response = `You're at ${kFormatter(steps_done)} steps (${floors_done} floors), ${pctFormatter(pct)}% of movember 200k objective!`
         return message.send(response);
