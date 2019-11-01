@@ -52,6 +52,10 @@ function FitnessBot (config) {
       actions.push(stairs.onStairsAchievements)
     }
 
+    if (message.words.includes('#movember')) {
+      actions.push(stairs.onMovember)
+    }
+
     // Bike Commands
     if (message.words.includes('#btw')) {
       message.doneHash = '#btw'

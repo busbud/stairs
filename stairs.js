@@ -91,10 +91,35 @@ function onStairsAchievements (message, state) {
         message.send(`${Math.ceil(leftRuns)} runs (${Math.round(leftMeters)} meters) left for next achievement (${next.name}).`)
       ])
     })
+  }
+
+  function onMovember (message, state ) {
+    function kFormatter(num) {
+      return num > 9999 ? (num/1000).toFixed(0) + 'k' : num
+    }
+    function pctFormatter(num) {
+      if (num === 0) return num.toFixed(0)
+      if (num < 1) return num.toFixed(2)
+      if (num < 25) return num.toFixed(1)
+      return num.toFixed(0)
+    }
+      
+    return state.db.query('SELECT SUM(floors) AS total FROM runs')
+      .then(res => Number(res[0].total))
+      .then(floors_done => {
+        const TARGET = 200 * 1000
+        const steps_done = floors_done * 20
+        const pct = 100 * steps_done / TARGET
+        console.log({pct})
+        
+        const response = `You're at ${kFormatter(steps_done)} steps (${floors_done} floors), ${pctFormatter(pct)}% of movember 200k objective!`
+        return message.send(response);
+      })
 }
 
 module.exports = {
   onStairsDone,
   onStairsLeaderboard,
-  onStairsAchievements
+  onStairsAchievements,
+  onMovember
 }
