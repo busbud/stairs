@@ -111,7 +111,7 @@ function onStairsAchievements (message, state) {
         const steps_done = floors_done * 20
         const pct = 100 * steps_done / TARGET
         
-        const response = `So far the team have climbed ${kFormatter(steps_done)} steps (${floors_done} floors), ${pctFormatter(pct)}% of movember 200k objective! Let's do it!`
+        const response = `So far we have climbed ${kFormatter(steps_done)} steps (${floors_done} floors), ${pctFormatter(pct)}% of movember 200k objective! Let's do it!`
         return message.send(response);
       })
 }
