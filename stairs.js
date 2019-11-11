@@ -149,7 +149,7 @@ function onStairsAchievements (message, state) {
   
     await message.send(`So far we have climbed ${kFormatter(totalSteps)} steps (${totalFloors} floors), ${pctFormatter(objectivePercent)}% of movember 200k objective!
   - The expected completion by the end of today is at least ${kFormatter(expectedSteps)} steps (${expectedFloors} floors, ${pctFormatter(expectedPercent)}% of the objective).
-  - You need an average of ${Math.ceil(remainingRunsPerDay)} climbs a day to reach the objective by the end of the month.`)
+  - We need an average of ${Math.ceil(remainingRunsPerDay)} climbs a day to reach the objective by the end of the month.`)
 }
 
 module.exports = {
