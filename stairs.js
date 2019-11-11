@@ -93,7 +93,34 @@ function onStairsAchievements (message, state) {
     })
   }
 
-  function onMovember (message, state ) {
+  function countWorkingDays(startDate, endDate) {
+    let count = 0;
+    const curDate = startDate;
+    while (curDate <= endDate) {
+      const dayOfWeek = curDate.getDay();
+      if(!((dayOfWeek == 6) || (dayOfWeek == 0))){
+        count++;
+      }
+      curDate.setDate(curDate.getDate() + 1);
+    }
+    return count;
+  }
+
+  function getFirstDayOfMonth () {
+    const date = new Date()
+    const newDate = new Date(date.getFullYear(), date.getMonth(), 1)
+    console.log(newDate)
+    return newDate
+  }
+
+  function getLastDayOfMonth () {
+    const date = new Date()
+    const newDate = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+    console.log(newDate)
+    return newDate
+  }
+
+  async function onMovember (message, state ) {
     function kFormatter(num) {
       return num > 9999 ? (num/1000).toFixed(0) + 'k' : num
     }
@@ -103,17 +130,28 @@ function onStairsAchievements (message, state) {
       if (num < 25) return num.toFixed(1)
       return num.toFixed(0)
     }
-      
-    return state.db.query('SELECT SUM(floors) AS total FROM runs')
-      .then(res => Number(res[0].total))
-      .then(floors_done => {
-        const TARGET = 200 * 1000
-        const steps_done = floors_done * 20
-        const pct = 100 * steps_done / TARGET
-        
-        const response = `So far we have climbed ${kFormatter(steps_done)} steps (${floors_done} floors), ${pctFormatter(pct)}% of movember 200k objective! Let's do it!`
-        return message.send(response);
-      })
+    const res = await state.db.query(`SELECT SUM(floors) AS total FROM runs`)
+
+    const stepsPerFloor = 20;
+    const stepsObjective = 200 * 1000;
+
+    const totalFloors = res[0].total || 0
+    const totalSteps = totalFloors * stepsPerFloor
+    const objectiveRatio = totalSteps / stepsObjective
+    const objectivePercent = Math.floor(objectiveRatio * 100)
+    const totalWorkingDays = countWorkingDays(getFirstDayOfMonth(), getLastDayOfMonth())
+    const remainingDays = countWorkingDays(new Date(), getLastDayOfMonth())
+    const remainingSteps = stepsObjective - totalSteps
+    const remainingStepsPerDay = remainingSteps / remainingDays
+    const remainingRunsPerDay = remainingStepsPerDay / (stepsPerFloor * state.config.floors)
+    const expectedRatio = 1 - (remainingDays / totalWorkingDays)
+    const expectedPercent = 100 * expectedRatio
+    const expectedSteps = Math.ceil(expectedRatio * stepsObjective)
+    const expectedFloors = Math.ceil(expectedSteps / 20)
+  
+    await message.send(`So far we have climbed ${kFormatter(totalSteps)} steps (${totalFloors} floors), ${pctFormatter(objectivePercent)}% of movember 200k objective!
+  - The expected completion for today is at least ${kFormatter(expectedSteps)} steps (${expectedFloors} floors, ${pctFormatter(expectedPercent)}% of the objective).
+  - You need an average of ${Math.ceil(remainingRunsPerDay)} climbs a day to reach the objective by the end of the month.`)
 }
 
 module.exports = {
