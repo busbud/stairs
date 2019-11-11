@@ -109,14 +109,12 @@ function onStairsAchievements (message, state) {
   function getFirstDayOfMonth () {
     const date = new Date()
     const newDate = new Date(date.getFullYear(), date.getMonth(), 1)
-    console.log(newDate)
     return newDate
   }
 
   function getLastDayOfMonth () {
     const date = new Date()
     const newDate = new Date(date.getFullYear(), date.getMonth() + 1, 0)
-    console.log(newDate)
     return newDate
   }
 
@@ -140,7 +138,7 @@ function onStairsAchievements (message, state) {
     const objectiveRatio = totalSteps / stepsObjective
     const objectivePercent = Math.floor(objectiveRatio * 100)
     const totalWorkingDays = countWorkingDays(getFirstDayOfMonth(), getLastDayOfMonth())
-    const remainingDays = countWorkingDays(new Date(), getLastDayOfMonth())
+    const remainingDays = countWorkingDays(new Date(), getLastDayOfMonth()) - 1;
     const remainingSteps = stepsObjective - totalSteps
     const remainingStepsPerDay = remainingSteps / remainingDays
     const remainingRunsPerDay = remainingStepsPerDay / (stepsPerFloor * state.config.floors)
@@ -150,7 +148,7 @@ function onStairsAchievements (message, state) {
     const expectedFloors = Math.ceil(expectedSteps / 20)
   
     await message.send(`So far we have climbed ${kFormatter(totalSteps)} steps (${totalFloors} floors), ${pctFormatter(objectivePercent)}% of movember 200k objective!
-  - The expected completion for today is at least ${kFormatter(expectedSteps)} steps (${expectedFloors} floors, ${pctFormatter(expectedPercent)}% of the objective).
+  - The expected completion by the end of today is at least ${kFormatter(expectedSteps)} steps (${expectedFloors} floors, ${pctFormatter(expectedPercent)}% of the objective).
   - You need an average of ${Math.ceil(remainingRunsPerDay)} climbs a day to reach the objective by the end of the month.`)
 }
 
