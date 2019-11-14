@@ -128,12 +128,12 @@ function onStairsAchievements (message, state) {
       if (num < 25) return num.toFixed(1)
       return num.toFixed(0)
     }
-    const res = await state.db.query(`SELECT SUM(floors) AS total FROM runs`)
+    const totalFloors = (await state.db.query(`SELECT SUM(floors) AS total FROM runs`))[0].total || 0
+    const floorsToday = (await state.db.query(`SELECT SUM(floors) AS total FROM runs WHERE created_at::date = now()::date`))[0].total || 0
 
     const stepsPerFloor = 20;
     const stepsObjective = 200 * 1000;
 
-    const totalFloors = res[0].total || 0
     const totalSteps = totalFloors * stepsPerFloor
     const objectiveRatio = totalSteps / stepsObjective
     const objectivePercent = Math.floor(objectiveRatio * 100)
@@ -141,15 +141,17 @@ function onStairsAchievements (message, state) {
     const remainingDays = countWorkingDays(new Date(), getLastDayOfMonth()) - 1;
     const remainingSteps = stepsObjective - totalSteps
     const remainingStepsPerDay = remainingSteps / remainingDays
-    const remainingRunsPerDay = remainingStepsPerDay / (stepsPerFloor * state.config.floors)
+    const remainingFloorsPerDay = remainingStepsPerDay / stepsPerFloor
+    const remainingRunsPerDay = remainingFloorsPerDay / state.config.floors
     const expectedRatio = 1 - (remainingDays / totalWorkingDays)
     const expectedPercent = 100 * expectedRatio
     const expectedSteps = Math.ceil(expectedRatio * stepsObjective)
     const expectedFloors = Math.ceil(expectedSteps / 20)
+    const runsToday = Math.ceil(floorsToday / state.config.floors)
   
-    await message.send(`So far we have climbed ${kFormatter(totalSteps)} steps (${totalFloors} floors), ${pctFormatter(objectivePercent)}% of movember 200k objective!
-  - The expected completion by the end of today is at least ${kFormatter(expectedSteps)} steps (${expectedFloors} floors, ${pctFormatter(expectedPercent)}% of the objective).
-  - We need an average of ${Math.ceil(remainingRunsPerDay)} climbs a day to reach the objective by the end of the month.`)
+    await message.send(`Since Nov 1st we have climbed ${kFormatter(totalSteps)} steps (${totalFloors} floors), ${pctFormatter(objectivePercent)}% of movember 200k objective!
+  - We need an average of ${Math.ceil(remainingFloorsPerDay)} floors (${Math.ceil(remainingRunsPerDay)} climbs) a day to reach the objective by the end of the month.
+  - So far today we have completed ${floorsToday} floors (${runsToday} climbs)`)
 }
 
 module.exports = {
