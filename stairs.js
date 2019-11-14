@@ -57,7 +57,7 @@ function onStairsLeaderboard (message, state) {
       })
 
       rows.forEach((row, rank) => table.push([rank + 1, row.name, row.floors]))
-      return message.send('```\n' + table.toString() + '\n```')
+      return message.send('```\n' + table.toString() + '\n```', { threaded: true })
     })
 }
 
