@@ -90,7 +90,7 @@ function FitnessBot (config) {
   }
 
   fitnessBot.end = () => {
-    pg.end();
+    pg.end()
     if (config.adapter) {
       config.adapter.end()
     }

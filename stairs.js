@@ -4,14 +4,14 @@ const helpers = require('./helpers')
 
 async function onStairsDone (message, state) {
   const parseFloors = (text) => {
-    if (!text) return state.config.floors;
-    if (text === 'nn') return 5;
-    if (text.match(/^\d+/)) return Number(second_arg);
-    return state.config.floors;
+    if (!text) return state.config.floors
+    if (text === 'nn') return 5
+    if (text.match(/^\d+/)) return Number(secondArg)
+    return state.config.floors
   }
 
-  const second_arg = message.words[message.words.indexOf(message.doneHash) + 1]
-  const floors = parseFloors(second_arg);
+  const secondArg = message.words[message.words.indexOf(message.doneHash) + 1]
+  const floors = parseFloors(secondArg)
   const commandTarget = await helpers.getCommandTarget(message, state)
 
   if (commandTarget) {
@@ -91,65 +91,65 @@ function onStairsAchievements (message, state) {
         message.send(`${Math.ceil(leftRuns)} runs (${Math.round(leftMeters)} meters) left for next achievement (${next.name}).`)
       ])
     })
-  }
+}
 
-  function countWorkingDays(startDate, endDate) {
-    let count = 0;
-    const curDate = startDate;
-    while (curDate <= endDate) {
-      const dayOfWeek = curDate.getDay();
-      if(!((dayOfWeek == 6) || (dayOfWeek == 0))){
-        count++;
-      }
-      curDate.setDate(curDate.getDate() + 1);
+function countWorkingDays (startDate, endDate) {
+  let count = 0
+  const curDate = startDate
+  while (curDate <= endDate) {
+    const dayOfWeek = curDate.getDay()
+    if (!((dayOfWeek === 6) || (dayOfWeek === 0))) {
+      count++
     }
-    return count;
+    curDate.setDate(curDate.getDate() + 1)
   }
+  return count
+}
 
-  function getFirstDayOfMonth () {
-    const date = new Date()
-    const newDate = new Date(date.getFullYear(), date.getMonth(), 1)
-    return newDate
+function getFirstDayOfMonth () {
+  const date = new Date()
+  const newDate = new Date(date.getFullYear(), date.getMonth(), 1)
+  return newDate
+}
+
+function getLastDayOfMonth () {
+  const date = new Date()
+  const newDate = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+  return newDate
+}
+
+async function onMovember (message, state) {
+  function kFormatter (num) {
+    return num > 9999 ? (num / 1000).toFixed(0) + 'k' : num
   }
-
-  function getLastDayOfMonth () {
-    const date = new Date()
-    const newDate = new Date(date.getFullYear(), date.getMonth() + 1, 0)
-    return newDate
+  function pctFormatter (num) {
+    if (num === 0) return num.toFixed(0)
+    if (num < 1) return num.toFixed(2)
+    if (num < 25) return num.toFixed(1)
+    return num.toFixed(0)
   }
+  const totalFloors = (await state.db.query(`SELECT SUM(floors) AS total FROM runs`))[0].total || 0
+  const floorsToday = (await state.db.query(`SELECT SUM(floors) AS total FROM runs WHERE created_at::date = now()::date`))[0].total || 0
 
-  async function onMovember (message, state ) {
-    function kFormatter(num) {
-      return num > 9999 ? (num/1000).toFixed(0) + 'k' : num
-    }
-    function pctFormatter(num) {
-      if (num === 0) return num.toFixed(0)
-      if (num < 1) return num.toFixed(2)
-      if (num < 25) return num.toFixed(1)
-      return num.toFixed(0)
-    }
-    const totalFloors = (await state.db.query(`SELECT SUM(floors) AS total FROM runs`))[0].total || 0
-    const floorsToday = (await state.db.query(`SELECT SUM(floors) AS total FROM runs WHERE created_at::date = now()::date`))[0].total || 0
+  const stepsPerFloor = 20
+  const stepsObjective = 200 * 1000
 
-    const stepsPerFloor = 20;
-    const stepsObjective = 200 * 1000;
+  const totalSteps = totalFloors * stepsPerFloor
+  const objectiveRatio = totalSteps / stepsObjective
+  const objectivePercent = Math.floor(objectiveRatio * 100)
+  const remainingDays = countWorkingDays(new Date(), getLastDayOfMonth()) - 1
+  const remainingSteps = stepsObjective - totalSteps
+  const remainingStepsPerDay = remainingSteps / remainingDays
+  const remainingFloorsPerDay = remainingStepsPerDay / stepsPerFloor
+  const remainingRunsPerDay = remainingFloorsPerDay / state.config.floors
+  const totalWorkingDays = countWorkingDays(getFirstDayOfMonth(), getLastDayOfMonth())
+  const expectedRatio = 1 - (remainingDays / totalWorkingDays)
+  const expectedPercent = 100 * expectedRatio
+  const expectedSteps = Math.ceil(expectedRatio * stepsObjective)
+  const expectedFloors = Math.ceil(expectedSteps / 20)
+  const runsToday = Math.ceil(floorsToday / state.config.floors)
 
-    const totalSteps = totalFloors * stepsPerFloor
-    const objectiveRatio = totalSteps / stepsObjective
-    const objectivePercent = Math.floor(objectiveRatio * 100)
-    const totalWorkingDays = countWorkingDays(getFirstDayOfMonth(), getLastDayOfMonth())
-    const remainingDays = countWorkingDays(new Date(), getLastDayOfMonth()) - 1;
-    const remainingSteps = stepsObjective - totalSteps
-    const remainingStepsPerDay = remainingSteps / remainingDays
-    const remainingFloorsPerDay = remainingStepsPerDay / stepsPerFloor
-    const remainingRunsPerDay = remainingFloorsPerDay / state.config.floors
-    const expectedRatio = 1 - (remainingDays / totalWorkingDays)
-    const expectedPercent = 100 * expectedRatio
-    const expectedSteps = Math.ceil(expectedRatio * stepsObjective)
-    const expectedFloors = Math.ceil(expectedSteps / 20)
-    const runsToday = Math.ceil(floorsToday / state.config.floors)
-  
-    await message.send(`Since Nov 1st we have climbed ${kFormatter(totalSteps)} steps (${totalFloors} floors), ${pctFormatter(objectivePercent)}% of movember 200k objective!
+  await message.send(`Since Nov 1st we have climbed ${kFormatter(totalSteps)} steps (${totalFloors} floors), ${pctFormatter(objectivePercent)}% of movember 200k objective!
   - We need an average of ${Math.ceil(remainingFloorsPerDay)} floors (${Math.ceil(remainingRunsPerDay)} climbs) a day to reach the objective by the end of the month.
   - So far today we have completed ${floorsToday} floors (${runsToday} climbs)`)
 }

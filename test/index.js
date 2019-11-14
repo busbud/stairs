@@ -1,15 +1,15 @@
 const Stairs = require('../')
 
-async function run() {
+async function run () {
   const stairs = await Stairs({
     floors: 9,
     floorHeight: 1,
     db: 'postgres://localhost/stairs'
   })
-  
+
   const foo = { id: '1', name: 'foo' }
   const bar = { id: '2', name: 'bar' }
-  
+
   function send (message) {
     return stairs.onMessage(Object.assign({
       send: message => console.log(message),
@@ -32,4 +32,4 @@ async function run() {
   stairs.end()
 }
 
-run().then(() => process.exit());
+run().then(() => process.exit())
