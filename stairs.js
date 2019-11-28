@@ -135,7 +135,7 @@ async function onMovember (message, state) {
   const stepsObjective = 200 * 1000
 
   const totalSteps = totalFloors * stepsPerFloor
-  const totalStepsYesterday = totalFloors - floorsToday
+  const totalStepsYesterday = (totalFloors - floorsToday) * stepsPerFloor
   const objectiveRatio = totalSteps / stepsObjective
   const objectivePercent = Math.floor(objectiveRatio * 100)
   const remainingDays = countWorkingDays(new Date(), getLastDayOfMonth())
