@@ -2,6 +2,10 @@ const Table = require('cli-table2')
 
 const helpers = require('./helpers')
 
+const stepsObjective = 200 * 1000
+const stepsPerFloor = 20
+let isObjectiveReached = false
+
 async function onStairsDone (message, state) {
   const parseFloors = (text) => {
     if (!text) return state.config.floors
@@ -19,8 +23,15 @@ async function onStairsDone (message, state) {
     await message.react('muscle')
 
     const res = await state.db.query('SELECT SUM(floors) AS total FROM runs')
-    const total = res[0].total * state.config.floorHeight
-    const achievement = state.achievements.find(({ height }) => height > (total - (floors * state.config.floorHeight)) && height <= total)
+    const totalFloors = res[0].total || 0
+    const totalSteps = totalFloors * stepsPerFloor
+    const totalHeight = totalFloors * state.config.floorHeight
+    const achievement = state.achievements.find(({ height }) => height > (totalHeight - (floors * state.config.floorHeight)) && height <= totalHeight)
+
+    if (!isObjectiveReached && totalSteps >= stepsObjective && totalSteps < stepsObjective + (50 * stepsPerFloor)) {
+      isObjectiveReached = true
+      await message.send(`:tada::tada: @channel, Congratulations, you have reached the objective of 200k steps for this year's Movember challenge! :tada::tada:`)
+    }
 
     if (achievement) {
       await message.send(`@here, you just reached the ${achievement.name} (${achievement.location}), with a total of ${achievement.height} meters!`)
@@ -131,9 +142,6 @@ async function onMovember (message, state) {
   const totalFloors = (await state.db.query(`SELECT SUM(floors) AS total FROM runs`))[0].total || 0
   const floorsToday = (await state.db.query(`SELECT SUM(floors) AS total FROM runs WHERE created_at::date = now()::date`))[0].total || 0
 
-  const stepsPerFloor = 20
-  const stepsObjective = 200 * 1000
-
   const totalSteps = totalFloors * stepsPerFloor
   const totalStepsYesterday = (totalFloors - floorsToday) * stepsPerFloor
   const objectiveRatio = totalSteps / stepsObjective
@@ -150,9 +158,13 @@ async function onMovember (message, state) {
   const expectedFloors = Math.ceil(expectedSteps / 20)
   const runsToday = Math.ceil(floorsToday / state.config.floors)
 
+  const avgMessage = totalSteps >= stepsObjective
+    ? ''
+    : `- We need an average of ${Math.ceil(remainingFloorsPerDay)} floors (${Math.ceil(remainingRunsPerDay)} climbs) a day to reach the objective by the end of the month.
+  `
+
   await message.send(`Since Nov 1st we have climbed ${kFormatter(totalSteps)} steps (${totalFloors} floors), ${pctFormatter(objectivePercent)}% of movember 200k objective!
-  - We need an average of ${Math.ceil(remainingFloorsPerDay)} floors (${Math.ceil(remainingRunsPerDay)} climbs) a day to reach the objective by the end of the month.
-  - So far today we have completed ${floorsToday} floors (${runsToday} climbs)`)
+  ${avgMessage}- So far today we have completed ${floorsToday} floors (${runsToday} climbs)`)
 }
 
 module.exports = {
